@@ -1,0 +1,18 @@
+# Dependencies (the test harness installs jsdom locally; nothing is bundled)
+node_modules/
+package-lock.json
+
+# Obsidian runtime state — written by the plugin inside a vault, never source
+data.json
+quilts/
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Scratch
+*.log
+tmp/

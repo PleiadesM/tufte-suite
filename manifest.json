@@ -1,0 +1,10 @@
+{
+  "id": "tufte-suite",
+  "name": "Tufte Suite",
+  "version": "1.0.0",
+  "minAppVersion": "1.4.0",
+  "description": "The four Tufte plugins - Sidenotes, Figures, Inline and Backlinks - bundled as a single plugin with per-module toggles. Disable the standalone plugins while this is enabled.",
+  "author": "Daocheng Lin",
+  "authorUrl": "https://github.com/PleiadesM",
+  "isDesktopOnly": false
+}

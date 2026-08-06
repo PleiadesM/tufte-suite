@@ -1,0 +1,1122 @@
+/* Tufte Suite 1.0.0 - GENERATED 2026-08-05 by build-tufte-suite.js.
+   Concatenation of the standalone plugins' styles.css in load order:
+   tufte-backlinks, tufte-figures, tufte-sidenotes.
+   (tufte-inline has no styles.css; its styling lives in the Tufte theme.)
+   Do not hand-edit; fix the standalone plugin's styles.css and regenerate. */
+
+/* ═══════════ tufte-backlinks 1.0.1 styles.css ═══════════ */
+
+/* ============================================================================
+   Tufte Backlinks plugin styles
+
+   Every rule is scoped to the plugin's own rendered wrapper inside a backlink
+   match, so nothing here can reach the global Search pane or ordinary note
+   content. The rules are STRUCTURAL — the theme keeps ownership of colour and
+   type in the backlinks pane (theme.css, "Backlinks" section), which still
+   applies because the rendered content re-uses Obsidian's own
+   `.search-result-file-matched-text` class.
+
+   The one exception is the target-link rule: that treatment IS the feature,
+   and it uses the theme's accent with a fallback to Obsidian's, so the plugin
+   also looks right under other themes.
+   ============================================================================ */
+
+/* The backlink reference itself — the link in the snippet that resolves to
+   the page whose mentions are being listed. Bold + underlined + accent red so
+   it stands apart from whatever else the snippet renders. Specificity is kept
+   modest on purpose, so theme.css can refine it (underline thickness, offset)
+   later without reaching for !important. */
+.backlink-pane
+  .search-result-file-match
+  .tufte-backlinks-rendered
+  a.internal-link.tufte-backlinks-target {
+  font-weight: bold;
+  text-decoration: underline;
+  color: var(--tufte-accent, var(--text-accent));
+}
+
+/* A mention is one line of context, not a document: flatten the block spacing
+   so a rendered paragraph occupies the same visual slot the raw text did, and
+   zero the outer edges so the match keeps the theme's own padding. */
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered p,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered ul,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered ol,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered blockquote,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered pre,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered table {
+  margin: 0.15em 0;
+}
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered > :first-child {
+  margin-top: 0;
+}
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered > :last-child {
+  margin-bottom: 0;
+}
+
+/* Heading safety net. Markers are stripped before rendering, so this only
+   catches what the stripper can't see (an embed's own heading, a future
+   Obsidian snippet shape) — but a display-size heading inside a mention list
+   would wreck the pane, so the net stays. */
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered h1,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered h2,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered h3,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered h4,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered h5,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered h6 {
+  /* Every heading font-size competitor is a normal declaration — app.css's
+     `.markdown-rendered hN { font-size: var(--hN-size) }` (0,1,1) and the
+     Tufte theme's mobile `.markdown-preview-view hN` (0,1,1); since the
+     theme's 1.15.6 !important audit none is important — so this (0,3,1)
+     wins on specificity alone. */
+  font-size: 1em;
+  font-weight: inherit;
+  font-family: inherit;
+  line-height: inherit;
+  margin: 0.15em 0;
+}
+
+/* Lists: enough indent to read as a list, far less than the editor's. */
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered ul,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered ol {
+  padding-inline-start: 1.2em;
+}
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered li {
+  margin: 0;
+}
+
+/* Code blocks wrap instead of raising a horizontal scrollbar in a pane this
+   narrow. */
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* Under third-party themes this (0,3,1) beats any normal pre sizing. The
+     one important competitor is the Tufte theme's own
+     `.markdown-preview-view pre { font-size: 0.65em !important }`, which a
+     normal declaration cannot outrank — so THAT fight is settled by an
+     insulation rule in theme.css's Backlinks section, keeping this
+     stylesheet !important-free per the community-directory guideline. */
+  font-size: 0.9em;
+}
+
+/* ---- Note-context insulation --------------------------------------------
+   The in-document backlinks block lives INSIDE the note's
+   `.markdown-preview-view`, so the theme's note typography — tuned for a 21px
+   body — cascades straight into these snippets, which the app sets at 12px
+   (`.search-result-file-matches` → `--font-ui-smaller`). Measured against the
+   real app.css + theme.css stack, inline code landed at 7.8px and task lines
+   at 10.2px. Anything the theme sizes relative to the note body has to be
+   re-anchored to the snippet's own size here. Sidebar-pane snippets are
+   unaffected either way — these rules are simply neutral there.
+   ------------------------------------------------------------------------- */
+
+/* Inline code: the theme's `.markdown-preview-view :not(pre) > code
+   { font-size: 0.65em }` has been a normal declaration since the theme's
+   1.15.6 !important audit, so this (0,3,1) outranks it (0,1,2) — and any
+   third-party theme's code sizing — on specificity alone. */
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered code {
+  font-size: 0.9em;
+}
+
+/* Task lines sit at snippet size like every other line. The theme's
+   `.markdown-preview-view li.task-list-item { font-size: 0.85em }` is not
+   important, so specificity alone settles it. */
+.backlink-pane
+  .search-result-file-match
+  .tufte-backlinks-rendered
+  li.task-list-item {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Media net: embeds are demoted to links before rendering, so this only backs
+   that up — a mention must never turn into a picture or a player. */
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered img,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered video,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered audio,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered iframe,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered .internal-embed {
+  display: none;
+}
+
+/* The whole snippet stays ONE affordance — click anywhere to jump to the
+   mention, exactly as before the plugin. Inert sub-elements also mean a
+   checkbox in a rendered task line can never mutate the source file. */
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered a,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered input,
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered button {
+  pointer-events: none;
+}
+
+/* MathJax ships its own display margins, which push a mention out of line.
+   Targets the `.MathJax` class MathJax v3 stamps on its container (the error
+   path emits "MathJax mjx-output-error", so it still matches): this (0,4,0)
+   outranks MathJax's runtime `mjx-container[jax][display]` margins (0,2,1)
+   and the theme's `.math-block > .MathJax` margins (0,3,0) — all normal
+   declarations — so no !important is needed. */
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered .MathJax {
+  margin: 0;
+}
+
+/* A snippet that starts at the top of a note can render its frontmatter. */
+.backlink-pane .search-result-file-match .tufte-backlinks-rendered .frontmatter,
+.backlink-pane
+  .search-result-file-match
+  .tufte-backlinks-rendered
+  .frontmatter-container {
+  display: none;
+}
+
+/* ═══════════ tufte-figures 1.7.2 styles.css ═══════════ */
+
+/* ============================================================================
+   Tufte Figures plugin styles
+
+   Layout for the three figure modes, gated by `body.tufte-figures-enabled`
+   (set by the plugin only while the Tufte theme is active) and scoped to
+   Reading view. The editor stays single-column: figure callouts appear as
+   ordinary callouts there, matching the Tufte Sidenotes plugin.
+
+   Modes:
+    1. [!figure]       — image in the text column, caption + "Fig. N."
+                         placed in the right margin by a two-column grid.
+                         The postprocessor builds canonical image/caption
+                         containers and folds the callout title into the
+                         caption as a red italic label.
+     2. [!figure-full]  — image spans the column + right gutter; the title
+                          element is hidden and the postprocessor prepends
+                          a "Fig. N." label inline at the start of the
+                          caption beneath the image.
+     3. [!figure-margin] — image + caption both in the margin; the title
+                           is folded into the caption as a red italic label.
+                           Legacy image-bearing [!marginnote] callouts are
+                           still styled/read for older notes.
+
+   In-text reference: rendered as a clickable black "(Fig. N)" with an
+   underline — the same in editor live preview and in reading view.
+
+   Geometry mirrors the marginalia in tufte-sidenotes/styles.css: pane-
+   proportional `cqi` widths/pulls (22cqi caption in the 30cqi gutter) that
+   scale instead of overflowing, collapsing in-flow via the theme's
+   `@container tufte-pane (max-width: 760px)` (Tufte CSS's own breakpoint;
+   + a 600px phone breakpoint).
+   ============================================================================ */
+
+/* ---- Mode 1: default figure — image in column, caption in margin -------- */
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] {
+  display: block !important;
+  float: none !important;
+  width: auto !important;
+  margin: 1.8rem 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--tufte-ink) !important;
+  overflow: visible !important;
+  mix-blend-mode: normal !important;
+}
+
+/* The postprocessor replaces Obsidian's fragile paragraph soup with two
+   canonical direct children: image holder and caption holder. CSS only
+   targets those plugin-owned containers for default figures. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content {
+  padding: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 22cqi !important;   /* caption column = 22% of the pane */
+  column-gap: 1rem !important;
+  margin-right: -22cqi !important;                          /* shift the caption column into the gutter (proportional) */
+  align-items: start !important;
+}
+
+/* Image holder: canonical main-column container. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-image-holder {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+/* Caption holder: canonical side-column container. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-caption-holder {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  margin: 0.1rem 0 !important;
+  color: var(--tufte-muted) !important;
+  font-size: 0.85em !important;
+  line-height: 1.4 !important;
+  font-style: normal !important;
+  overflow-wrap: anywhere !important;
+  min-width: 0 !important;
+}
+
+/* Mirror the sidenote convention: the figure label behaves like a small
+   left-floated title, and the caption text follows immediately after it. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-caption-holder .tufte-fig-label {
+  display: block !important;
+  float: left !important;
+  margin: 0.05em 0.25em 0 0 !important;
+  line-height: 1 !important;
+}
+
+/* Normalise moved paragraph/embed spacing inside canonical containers. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-image-holder > *,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-caption-holder > *,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-image-holder > .el-p > p,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-caption-holder > .el-p > p,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-image-holder > p,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-caption-holder > p {
+  margin: 0 !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .internal-embed,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .image-embed {
+  max-width: 100% !important;
+}
+/* Honor an explicit `|W` / `|WxH` size; only force auto-height when the
+   embed carries no native size (the .tufte-fig-sized marker is added by the
+   decorator). max-width above still guards against column overflow. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"]:not(.tufte-fig-sized) img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"]:not(.tufte-fig-sized) .internal-embed,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"]:not(.tufte-fig-sized) .image-embed {
+  height: auto !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-icon {
+  display: none !important;
+}
+
+/* The decorator folds "Fig. N." into the start of the caption. Only hide
+   the standalone title after decoration has actually marked it; if Obsidian
+   ever skips the postprocessor on a render pass, the label remains visible
+   instead of disappearing. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-title.tufte-figure-title-hidden,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"]:has(.tufte-fig-label) .callout-title {
+  display: none !important;
+}
+
+/* ---- Mode 2: full-width figure — spans column + gutter, caption below --- */
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] {
+  display: block !important;
+  float: none !important;
+  width: auto !important;
+  /* Extend rightward across the full marginalia gutter (proportional, so it
+     spans the column + gutter at any pane width). Reset at <=760px below. */
+  margin: 1.8rem -30cqi 1.8rem 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--tufte-ink) !important;
+  overflow: visible !important;
+  mix-blend-mode: normal !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-content {
+  padding: 0 !important;
+}
+
+/* Mode 2 now mirrors Mode 1's canonical DOM. The same image/caption
+   containers are source-rendered by the postprocessor; only the geometry
+   differs here, so the image spans the text column plus right gutter and
+   the caption remains below it. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-content > .tufte-fig-image-holder {
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-content > .tufte-fig-caption-holder {
+  margin: 0.4rem 0 0 0 !important;
+  color: var(--tufte-muted) !important;
+  font-size: 0.85em !important;
+  line-height: 1.4 !important;
+  font-style: normal !important;
+  overflow-wrap: anywhere !important;
+  min-width: 0 !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-content > .tufte-fig-image-holder > *,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-content > .tufte-fig-caption-holder > *,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-content > .tufte-fig-image-holder > .el-p > p,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-content > .tufte-fig-caption-holder > .el-p > p,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-content > .tufte-fig-image-holder > p,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-content > .tufte-fig-caption-holder > p {
+  margin: 0 !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .internal-embed,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .image-embed {
+  max-width: 100% !important;
+}
+/* Default full-width: span the column + gutter. When the embed carries an
+   explicit size (.tufte-fig-sized), drop the forced full-bleed width so the
+   chosen dimensions are honored (still capped by max-width above). */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"]:not(.tufte-fig-sized) img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"]:not(.tufte-fig-sized) .internal-embed,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"]:not(.tufte-fig-sized) .image-embed {
+  width: 100% !important;
+  height: auto !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-icon {
+  display: none !important;
+}
+
+/* The standalone title element is hidden in reading view — the post-
+   processor prepends a `Fig. N.` span into the caption paragraph instead,
+   so the label and the caption read on a single line. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-title.tufte-figure-title-hidden {
+  display: none !important;
+}
+
+/* ---- Mode 3: margin figure — image + caption in the margin ------------- */
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] {
+  float: right !important;
+  clear: right !important;
+  width: 22cqi !important;                         /* pane-proportional */
+  margin: 0.3rem -24cqi 1rem 1rem !important;      /* pulled into the gutter proportionally */
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  font-size: 0.85em !important;
+  line-height: 1.4 !important;
+  color: var(--tufte-muted) !important;
+  font-style: normal !important;
+  mix-blend-mode: normal !important;
+  box-shadow: none !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content {
+  padding: 0 !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-title {
+  padding: 0 !important;
+  margin: 0 0 0.35rem 0 !important;
+  background: transparent !important;
+  color: var(--tufte-accent) !important;
+  font-family: var(--font-text-theme) !important;
+  font-style: italic !important;
+  font-weight: normal !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-icon,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-title.tufte-figure-title-hidden {
+  display: none !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-image-holder,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-caption-holder {
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-caption-holder {
+  margin-top: 0.35rem !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-caption-holder .tufte-fig-label {
+  display: block !important;
+  float: left !important;
+  margin: 0.05em 0.25em 0 0 !important;
+  line-height: 1 !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-image-holder > *,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-caption-holder > *,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-image-holder > .el-p > p,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-caption-holder > .el-p > p,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-image-holder > p,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-caption-holder > p {
+  margin: 0 !important;
+}
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .internal-embed,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .image-embed,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="marginnote"] img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="marginnote"] .internal-embed,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="marginnote"] .image-embed {
+  max-width: 100% !important;
+}
+/* Auto-height unless an explicit size is set on a margin figure. Legacy
+   image-bearing marginnotes always auto-height (no sizing UI). */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"]:not(.tufte-fig-sized) img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"]:not(.tufte-fig-sized) .internal-embed,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"]:not(.tufte-fig-sized) .image-embed,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="marginnote"] img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="marginnote"] .internal-embed,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="marginnote"] .image-embed {
+  height: auto !important;
+}
+
+/* ---- The "Fig. N." label span ------------------------------------------- */
+/* Wrapped around the label by the postprocessor for all three figure
+   modes. Tufte-red + italic so the indicator stands out against the
+   muted caption text and matches the theme's other emphatic markers.
+   The in-text "(Fig. N)" reference is styled separately below and
+   stays upright. */
+body.tufte-figures-enabled .markdown-preview-view .tufte-fig-label,
+body.tufte-figures-enabled .markdown-source-view.mod-cm6 .tufte-fig-label {
+  color: var(--tufte-accent) !important;
+  font-family: var(--font-text-theme) !important;
+  font-style: italic !important;
+  font-weight: normal !important;
+}
+
+/* Defensive Live Preview cleanup: default figures already show "Fig. N."
+   as their editable callout title, so any postprocessor-injected label in
+   the rendered editor body is a duplicate. Hide only that label; if a
+   caption is present in the same holder, the caption text remains visible. */
+body.tufte-figures-enabled .markdown-source-view .callout[data-callout="figure"] .tufte-fig-label {
+  display: none !important;
+}
+
+/* Full-width figures are intentionally dramatic in Reading view, but that
+   negative-margin geometry is noisy in Live Preview: activating any nearby
+   callout can make CodeMirror remeasure and flash the oversized figure. Keep
+   editor-rendered full-width figures single-column and hide the injected
+   label there; the editable callout title already shows "Fig. N.". */
+body.tufte-figures-enabled .markdown-source-view .callout[data-callout="figure-full"] {
+  float: none !important;
+  width: auto !important;
+  margin: 1em 0 !important;
+  overflow: visible !important;
+}
+
+body.tufte-figures-enabled .markdown-source-view .callout[data-callout="figure-full"] .tufte-fig-label {
+  display: none !important;
+}
+
+body.tufte-figures-enabled .markdown-source-view .callout[data-callout="figure-full"] .callout-title.tufte-figure-title-hidden {
+  display: flex !important;
+}
+
+body.tufte-figures-enabled .markdown-source-view .callout[data-callout="figure-margin"] .tufte-fig-label {
+  display: none !important;
+}
+
+body.tufte-figures-enabled .markdown-source-view .callout[data-callout="figure-margin"] .callout-title.tufte-figure-title-hidden {
+  display: flex !important;
+}
+
+/* ---- In-text figure reference: black "(Fig. N)" with an underline ------ */
+/* Source is `[[#^fig-N|(Fig. N)]]`; the alias renders verbatim. We knock
+   off the link's default colour and weight so it reads as ordinary prose
+   with a quiet underline. Applies in both reading view and live-preview
+   editor surfaces. */
+body.tufte-figures-enabled .markdown-preview-view a.internal-link[href*="#^fig-"],
+body.tufte-figures-enabled .markdown-preview-view a.internal-link[data-href*="#^fig-"] {
+  color: var(--tufte-ink) !important;
+  text-decoration: underline !important;
+  text-decoration-thickness: 0.5px !important;
+  text-underline-offset: 2px !important;
+  font-size: inherit !important;
+  vertical-align: baseline !important;
+  font-weight: inherit !important;
+  font-style: inherit !important;
+  line-height: inherit !important;
+}
+body.tufte-figures-enabled .markdown-preview-view a.internal-link[href*="#^fig-"]:hover,
+body.tufte-figures-enabled .markdown-preview-view a.internal-link[data-href*="#^fig-"]:hover {
+  color: var(--tufte-accent) !important;
+}
+
+/* ---- Modal: tabs + multi-image entry list ------------------------------- */
+
+.tufte-figure-modal .tufte-fig-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 0 0.9rem 0;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+.tufte-figure-modal .tufte-fig-tabs button {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0.35rem 0.2rem;
+  margin-bottom: -1px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.tufte-figure-modal .tufte-fig-tabs button.is-active {
+  color: var(--text-normal);
+  border-bottom-color: var(--interactive-accent);
+}
+.tufte-figure-modal .tufte-fig-multi-hint {
+  margin: 0 0 0.6rem 0;
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+.tufte-figure-modal .tufte-fig-entries {
+  margin: 0.2rem 0;
+}
+.tufte-figure-modal .tufte-fig-entry {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+.tufte-figure-modal .tufte-fig-entry-thumb {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+}
+.tufte-figure-modal .tufte-fig-entry-thumb-empty {
+  display: inline-block;
+}
+.tufte-figure-modal .tufte-fig-entry-name {
+  flex: 0 0 6em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8em;
+  color: var(--text-muted);
+}
+.tufte-figure-modal .tufte-fig-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+  padding: 0.9rem;
+  border: 1.5px dashed var(--background-modifier-border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.tufte-figure-modal .tufte-fig-dropzone:hover,
+.tufte-figure-modal .tufte-fig-dropzone.is-dragover {
+  border-color: var(--interactive-accent);
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+.tufte-figure-modal .tufte-fig-dropzone-plus {
+  font-size: 1.3em;
+  line-height: 1;
+  font-weight: 600;
+}
+.tufte-figure-modal .tufte-fig-entry-label {
+  flex: 0 0 3em;
+  width: 3em;
+}
+.tufte-figure-modal .tufte-fig-entry-caption {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.tufte-figure-modal .tufte-fig-entry-remove {
+  flex: 0 0 auto;
+  padding: 0 0.5em;
+}
+
+/* ---- Modal: image-quilt tab -------------------------------------------- */
+/* The working area packs tiles edge-to-edge with the inline-block + font-size:0
+   trick (the same approach the original imagequilts.com uses). Each tile clips
+   its image so the zoom transform crops rather than spills. The arrangement
+   here is mirrored to a transparent-background canvas on export. */
+.tufte-figure-modal .tufte-quilt-stage {
+  font-size: 0;
+  line-height: 0;
+  margin: 0.4rem 0 0.2rem 0;
+  padding: 4px;
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-secondary);
+  /* A faint checkerboard hints at the transparent background of the export. */
+  background-image:
+    linear-gradient(45deg, var(--background-modifier-border) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--background-modifier-border) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--background-modifier-border) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--background-modifier-border) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  touch-action: none;
+}
+.tufte-figure-modal .tufte-quilt-empty {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  padding: 1.2rem 0.6rem;
+  text-align: center;
+}
+.tufte-figure-modal .tufte-quilt-tile {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  vertical-align: top;
+  cursor: grab;
+  background: var(--background-primary);
+}
+.tufte-figure-modal .tufte-quilt-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: center center;
+  pointer-events: none;
+  user-select: none;
+}
+.tufte-figure-modal .tufte-quilt-tile.is-dragging {
+  cursor: grabbing;
+  opacity: 0.75;
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: -2px;
+  z-index: 2;
+}
+.tufte-figure-modal .tufte-quilt-tile-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: 11px;
+  line-height: 16px;
+  border-radius: 50%;
+  border: none;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.tufte-figure-modal .tufte-quilt-tile:hover .tufte-quilt-tile-remove {
+  opacity: 1;
+}
+
+/* ---- Multi-image figures (≥2 images in one callout) --------------------- */
+/* The decorator adds `.tufte-fig-multi` (and `.tufte-fig-sized`, so the
+   single-mode width/height overrides above stand down) and builds a
+   `.tufte-fig-row` of `.tufte-fig-cell`s. Per-image widths are native, so
+   equal flex shrink keeps the row at one height with ratios intact. The
+   row layout applies in both reading view and the editor. */
+body.tufte-figures-enabled .tufte-fig-multi .tufte-fig-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+body.tufte-figures-enabled .tufte-fig-multi .tufte-fig-cell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+body.tufte-figures-enabled .tufte-fig-multi .tufte-fig-cell-image {
+  margin: 0;
+  min-width: 0;
+}
+body.tufte-figures-enabled .tufte-fig-multi .tufte-fig-row img,
+body.tufte-figures-enabled .tufte-fig-multi .tufte-fig-row .internal-embed,
+body.tufte-figures-enabled .tufte-fig-multi .tufte-fig-row .image-embed {
+  display: block !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+/* Labels read inline in multi figures (the single-figure float would stack
+   each label awkwardly in a list). The second selector carries an extra
+   attribute so it outranks the single-figure caption-holder float rule. */
+body.tufte-figures-enabled .tufte-fig-multi .tufte-fig-label,
+body.tufte-figures-enabled .markdown-preview-view .callout.tufte-fig-multi[data-callout] .callout-content > .tufte-fig-caption-holder .tufte-fig-label,
+body.tufte-figures-enabled .markdown-source-view .callout.tufte-fig-multi[data-callout] .tufte-fig-label {
+  display: inline !important;
+  float: none !important;
+  margin: 0 0.25em 0 0 !important;
+}
+
+/* Mode 1 (default): images row in the column, every caption in the margin
+   list, overall caption after. Reuses the base figure grid. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"].tufte-fig-multi .tufte-fig-caption-item {
+  margin-bottom: 0.4rem;
+}
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"].tufte-fig-multi .tufte-fig-overall-caption {
+  margin-top: 0.55rem;
+}
+
+/* Modes 2 & 3: caption sits under each image. */
+body.tufte-figures-enabled .tufte-fig-multi .tufte-fig-cell-caption {
+  margin-top: 0.3rem;
+  color: var(--tufte-muted);
+  font-size: 0.85em;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+body.tufte-figures-enabled .tufte-fig-multi .tufte-fig-overall-caption {
+  color: var(--tufte-muted);
+  font-size: 0.85em;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+/* Mode 2 (full-width): overall caption below the whole row. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"].tufte-fig-multi .callout-content > .tufte-fig-caption-holder {
+  margin-top: 0.5rem !important;
+}
+
+/* Mode 3 (margin): stack the images vertically in the gutter —
+   image a, caption a, gap, image b, caption b, …, overall caption. */
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"].tufte-fig-multi .tufte-fig-row {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"].tufte-fig-multi .callout-content > .tufte-fig-caption-holder {
+  margin-top: 0.6rem !important;
+}
+
+/* ---- Click-to-enlarge lightbox (Reading view) --------------------------- */
+
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] img,
+body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="marginnote"] img {
+  cursor: zoom-in;
+}
+
+.tufte-fig-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-modal, 100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.82);
+  cursor: zoom-out;
+}
+.tufte-fig-lightbox img {
+  max-width: 95vw;
+  max-height: 95vh;
+  object-fit: contain;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  background: var(--tufte-paper, #fffff8);
+}
+
+/* ---- Responsive — collapse figures in-flow when the PANE (not the window)
+   is too narrow for the gutter. Uses the theme's `tufte-pane` container so it
+   tracks the pane even with the sidebars open. ----------------------------- */
+
+@container tufte-pane (max-width: 760px) {
+  /* Default figure: collapse the canonical containers into one column. */
+  body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content {
+    display: block !important;
+    margin-right: 0 !important;
+  }
+  body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-caption-holder {
+    margin: 0.4rem 0 !important;
+  }
+  /* Full-width figure: stop spilling into the (now absent) gutter. */
+  body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] {
+    margin-right: 0 !important;
+  }
+  body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] {
+    float: none !important;
+    width: auto !important;
+    margin: 1rem 0 1rem 2rem !important;
+    border-left: 1px solid var(--tufte-rule) !important;
+    padding-left: 1rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"],
+  body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"],
+  body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-caption-holder,
+  body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-full"] .callout-content > .tufte-fig-caption-holder,
+  body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure-margin"] .callout-content > .tufte-fig-caption-holder {
+    font-size: 0.9em !important;
+  }
+  /* Multi-image rows wrap rather than cram on a phone. */
+  body.tufte-figures-enabled .markdown-preview-view .tufte-fig-multi .tufte-fig-row {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* ═══════════ tufte-sidenotes 1.7.0 styles.css ═══════════ */
+
+/* ============================================================================
+   Tufte Sidenotes plugin styles
+
+   These rules intentionally live in the plugin, not the Tufte theme, so
+   sidenotes and marginnotes become ordinary Obsidian callouts when the plugin
+   is disabled. They are scoped to Reading view; the CodeMirror editor stays
+   single-column and shows sidenotes/marginnotes as normal callouts.
+   ============================================================================ */
+
+body.tufte-sidenotes-enabled .markdown-preview-view .footnote-link,
+body.tufte-sidenotes-enabled .markdown-preview-view sup.footnote-ref,
+body.tufte-sidenotes-enabled .markdown-preview-view sup.tufte-sidenote-ref,
+body.tufte-sidenotes-enabled .markdown-preview-view .tufte-sidenote-ref {
+  color: var(--tufte-accent) !important;
+  font-size: 0.75em !important;
+  vertical-align: super !important;
+  line-height: 0 !important;
+  text-decoration: none !important;
+  margin-left: 1px;
+  font-family: var(--font-text-theme);
+  font-style: normal;
+  font-weight: normal;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .footnotes,
+body.tufte-sidenotes-enabled .markdown-preview-view section.footnotes,
+body.tufte-sidenotes-enabled .markdown-preview-view ol:has(> li[data-footnote-id^="fn-"]),
+body.tufte-sidenotes-enabled .markdown-preview-view ol:has(> li[id^="fn-"]) {
+  display: none !important;
+}
+
+body.tufte-sidenotes-enabled .popover.hover-popover:has([id^="fn-"]),
+body.tufte-sidenotes-enabled .popover.hover-popover:has(.footnote-backref),
+body.tufte-sidenotes-enabled .popover.hover-popover:has(> .footnotes),
+body.tufte-sidenotes-enabled .popover.hover-popover > .markdown-embed[data-type="footnote"],
+body.tufte-sidenotes-enabled .tooltip.mod-footnote {
+  display: none !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .callout-title {
+  display: block;
+  float: left;
+  padding: 0;
+  margin: 0.05em 0.25em 0 0;
+  background: transparent;
+  color: var(--tufte-accent);
+  font-family: var(--font-text-theme);
+  font-size: 0.7em;
+  line-height: 1;
+  font-style: normal;
+  font-weight: normal;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .callout-icon {
+  display: none;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .callout-title-inner {
+  color: inherit;
+  font-style: normal;
+  font-weight: normal;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"].tufte-sidenote-untitled .callout-title {
+  display: none;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] .callout-title {
+  display: none;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .callout-content > .footnotes:first-child {
+  display: contents !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .footnotes hr,
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .footnote-backref {
+  display: none !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .footnotes ol {
+  display: block !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .footnotes li {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .footnotes p {
+  display: inline !important;
+  margin: 0 !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"],
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] {
+  float: right !important;
+  clear: right !important;
+  width: 22cqi !important;                       /* pane-proportional (Tufte-style %), scales so it never overflows */
+  margin: 0.3rem -24cqi 1rem 1rem !important;    /* pulled into the gutter proportionally (pull 24 > width 22) */
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  font-size: 0.85em !important;
+  line-height: 1.4 !important;
+  color: var(--tufte-muted) !important;
+  font-style: normal !important;
+  mix-blend-mode: normal !important;
+  box-shadow: none !important;
+  /* Long inline code (URLs, file paths) is one unbreakable token and
+     would overflow the marginnote box, getting clipped at the
+     viewport. Allow character-level wrapping inside marginnotes so
+     content stays within the box. */
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] code,
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] code {
+  /* Inline code in a marginnote must break at any character — file
+     paths and URLs are otherwise a single unbreakable word that
+     would push past the box's right edge. */
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
+  white-space: normal !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] .callout-title {
+  display: none !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .callout-content,
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] .callout-content {
+  padding: 0 !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .callout-content > *:first-child,
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] .callout-content > *:first-child {
+  margin-top: 0 !important;
+}
+
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] .callout-content > *:last-child,
+body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] .callout-content > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Collapsible marginalia — the Tufte CSS small-screen behaviour, pane-relative.
+
+   The original tufte-css hides sidenotes/marginnotes at its `@media (max-width:
+   760px)` breakpoint and turns the in-text marker into a click-to-reveal toggle.
+   We do the same, but keyed to the PANE via `@container tufte-pane` (never the
+   window) so it also fires when the sidebars narrow the pane inside a wide
+   window — the project's responsive rule. The plugin's tap handler mirrors this
+   same 760px threshold against the pane and toggles `tufte-sidenote-revealed` /
+   `tufte-marginnote-revealed` on click/Enter.
+
+     · Sidenote   — the floated callout is hidden; its NUMERIC superscript stays
+                    in the prose as the clickable toggle (numbers are kept, just
+                    as in tufte-css where only number-less marginnotes get a ⊕).
+                    Revealing drops the note inline, set off by the accent rule.
+     · Marginnote — has no number, so the callout stays in the flow but collapses
+                    to a ⊕ glyph (its title); the body shows only once revealed.
+
+   This single breakpoint also covers real phones: at a ≤600px window the pane is
+   likewise ≤760px, so the container query fires (the theme handles phone page
+   geometry separately in its own `@media (max-width: 600px)` block).
+   ────────────────────────────────────────────────────────────────────────── */
+@container tufte-pane (max-width: 760px) {
+  /* Hide the floated sidenote until its number is tapped. */
+  body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"] {
+    display: none !important;
+  }
+
+  /* Keep the numeric superscript in the text and make it the toggle. */
+  body.tufte-sidenotes-enabled .markdown-preview-view sup.tufte-sidenote-ref,
+  body.tufte-sidenotes-enabled .markdown-preview-view sup.footnote-ref,
+  body.tufte-sidenotes-enabled .markdown-preview-view sup.footnote-ref > .footnote-link {
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Revealed sidenote: inline block, full width, set off by the accent rule. */
+  body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"].tufte-sidenote-revealed {
+    display: block !important;
+    float: none !important;
+    clear: both !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0.6rem 0 1rem 1.25rem !important;
+    border-left: 2px solid var(--tufte-accent) !important;
+    padding-left: 0.75rem !important;
+    font-size: 0.95em !important;
+    line-height: 1.45 !important;
+    color: var(--tufte-ink) !important;
+  }
+
+  /* Show the note's own number inline (as a lead-in) once revealed. */
+  body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="sidenote"].tufte-sidenote-revealed .callout-title {
+    float: none !important;
+    display: inline !important;
+    margin: 0 0.3em 0 0 !important;
+  }
+
+  /* Marginnote: keep the block in the flow but collapse it to a ⊕ toggle. */
+  body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] {
+    display: block !important;
+    float: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0.25rem 0 1rem 0 !important;
+    border: none !important;
+    padding: 0 !important;
+    font-size: 0.95em !important;
+    line-height: 1.45 !important;
+    color: var(--tufte-ink) !important;
+  }
+
+  body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] .callout-title {
+    display: inline-block !important;
+    float: none !important;
+    margin: 0 !important;
+    color: var(--tufte-accent) !important;
+    font-family: var(--font-text-theme) !important;
+    font-size: 0.95em !important;
+    line-height: 1 !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] .callout-title::before {
+    content: "⊕";
+  }
+
+  body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] .callout-title-inner {
+    display: none !important;
+  }
+
+  body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"] .callout-content {
+    display: none !important;
+  }
+
+  body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"].tufte-marginnote-revealed {
+    margin: 0.6rem 0 1rem 1.25rem !important;
+    border-left: 2px solid var(--tufte-accent) !important;
+    padding-left: 0.75rem !important;
+  }
+
+  body.tufte-sidenotes-enabled .markdown-preview-view .callout[data-callout="marginnote"].tufte-marginnote-revealed .callout-content {
+    display: block !important;
+    margin-top: 0.45rem !important;
+  }
+}
