@@ -91,7 +91,8 @@ function makeFakeRequire(env) {
         mark: (s) => ({ mark: s }),
         replace: (s) => ({ replace: s }),
         none: []
-      }
+      },
+      WidgetType: class {}
     },
     "@codemirror/state": {
       RangeSetBuilder: class {

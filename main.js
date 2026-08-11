@@ -1,10 +1,10 @@
 /* ============================================================================
- * Tufte Suite 1.0.0 - the four Tufte plugins bundled as one plugin.
+ * Tufte Suite 1.0.1 - the four Tufte plugins bundled as one plugin.
  *
  * GENERATED FILE - built 2026-08-05 by build-tufte-suite.js from:
  *   tufte-backlinks 1.0.1     (embedded verbatim)
  *   tufte-figures 1.7.2       (embedded with ONE patch: quilt store path -> plugins/tufte-suite/quilts)
- *   tufte-inline 1.2.0        (embedded verbatim)
+ *   tufte-inline 1.2.1        (embedded verbatim)
  *   tufte-sidenotes 1.7.0     (embedded verbatim)
  *
  * Module load order mirrors the vault's community-plugins.json order:
@@ -3845,12 +3845,12 @@ defineSubmodule({
   key: "inline",
   id: "tufte-inline",
   name: "Tufte Inline",
-  version: "1.2.0",
+  version: "1.2.1",
   blurb: "Inline shorthands: ^^new thought^^, &&lead-in&&, @@CJK drop cap@@."
 }, function (module, exports, require) {
-/*<<<TUFTE-SUITE:BEGIN tufte-inline/main.js v1.2.0>>>*/
+/*<<<TUFTE-SUITE:BEGIN tufte-inline/main.js v1.2.1>>>*/
 const { Plugin, editorLivePreviewField } = require("obsidian");
-const { ViewPlugin, Decoration } = require("@codemirror/view");
+const { ViewPlugin, Decoration, WidgetType } = require("@codemirror/view");
 const { RangeSetBuilder } = require("@codemirror/state");
 const { syntaxTree } = require("@codemirror/language");
 
@@ -3947,9 +3947,19 @@ module.exports = class TufteInlinePlugin extends Plugin {
 
 /* ---- Reading view: replace delimiters with styled spans ------------------ */
 
+// Obsidian renders nested markup (links, bold, italics, …) into elements
+// before this post-processor runs, so a shorthand such as "&&a [[b]] c&&"
+// arrives split across several sibling nodes. Matching therefore runs per
+// parent element over a virtual string of its direct children: text nodes
+// contribute their text, element children collapse to one placeholder
+// character — so delimiters inside a child element can never open or close a
+// match here (they are handled when that element is processed as a parent).
+const CHILD_PLACEHOLDER = "￼"; // OBJECT REPLACEMENT CHARACTER
+
 function transformInlineSpans(root) {
   const doc = root.ownerDocument || document;
-  const candidates = [];
+  const parents = [];
+  const seen = new Set();
   const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       const v = node.nodeValue;
@@ -3963,32 +3973,79 @@ function transformInlineSpans(root) {
     },
   });
   let node;
-  while ((node = walker.nextNode())) candidates.push(node);
-
-  for (const textNode of candidates) {
-    const text = textNode.nodeValue;
-    const chosen = collectMatches(text);
-    if (!chosen.length) continue;
-
-    const doc2 = textNode.ownerDocument;
-    const fragment = doc2.createDocumentFragment();
-    let lastEnd = 0;
-    for (const h of chosen) {
-      const before = text.slice(lastEnd, h.start);
-      if (before) fragment.appendChild(doc2.createTextNode(before));
-      const span = doc2.createElement("span");
-      span.className = h.className;
-      span.textContent = h.inner;
-      fragment.appendChild(span);
-      lastEnd = h.end;
+  while ((node = walker.nextNode())) {
+    const parent = node.parentNode;
+    if (parent && !seen.has(parent)) {
+      seen.add(parent);
+      parents.push(parent);
     }
-    const tail = text.slice(lastEnd);
-    if (tail) fragment.appendChild(doc2.createTextNode(tail));
-    textNode.parentNode.replaceChild(fragment, textNode);
+  }
+  for (const parent of parents) transformWithinParent(parent, doc);
+}
+
+function transformWithinParent(parent, doc) {
+  const segments = [];
+  let virtual = "";
+  for (const child of parent.childNodes) {
+    const isText = child.nodeType === 3; // Node.TEXT_NODE
+    const piece = isText ? child.nodeValue : CHILD_PLACEHOLDER;
+    segments.push({
+      node: child,
+      isText,
+      start: virtual.length,
+      end: virtual.length + piece.length,
+    });
+    virtual += piece;
+  }
+
+  const locate = (pos) => segments.find((s) => pos >= s.start && pos < s.end);
+
+  // Wrap right-to-left: a wrap splits or moves nodes only at or after its own
+  // match, so earlier matches' segment references and offsets stay valid.
+  const chosen = collectMatches(virtual);
+  for (let i = chosen.length - 1; i >= 0; i--) {
+    const h = chosen[i];
+    const startSeg = locate(h.start);
+    const endSeg = locate(h.end - 1);
+    // Each delimiter must sit whole inside a text-node child of this parent;
+    // a match whose boundary falls inside an element child is left raw.
+    if (!startSeg || !startSeg.isText || h.start + DELIM_LEN > startSeg.end) continue;
+    if (!endSeg || !endSeg.isText || h.end - DELIM_LEN < endSeg.start) continue;
+
+    const range = doc.createRange();
+    range.setStart(startSeg.node, h.start - startSeg.start);
+    range.setEnd(endSeg.node, h.end - endSeg.start);
+    const frag = range.extractContents();
+    frag.firstChild.nodeValue = frag.firstChild.nodeValue.slice(DELIM_LEN);
+    frag.lastChild.nodeValue = frag.lastChild.nodeValue.slice(0, -DELIM_LEN);
+    const span = doc.createElement("span");
+    span.className = h.className;
+    span.appendChild(frag);
+    range.insertNode(span);
   }
 }
 
 /* ---- Live Preview: conceal delimiters + style inner text ----------------- */
+
+// The lead-in's tab-like indent (margin-right in the theme) cannot live on the
+// marked text here: CodeMirror splits a mark decoration at every nested-
+// decoration boundary (links, bold, italics), and a per-fragment margin would
+// open gaps inside the label. The theme zeroes the margin on
+// .cm-line .tufte-leadin, and this widget — rendered in place of the concealed
+// closing && — carries the indent instead.
+class LeadinIndentWidget extends WidgetType {
+  toDOM(view) {
+    const span = view.dom.ownerDocument.createElement("span");
+    span.className = "tufte-leadin-indent";
+    return span;
+  }
+  eq() {
+    return true;
+  }
+}
+const leadinIndentConceal = Decoration.replace({
+  widget: new LeadinIndentWidget(),
+});
 
 // True if `pos` sits inside a code or math syntax node — leave those raw.
 function inSkippedContext(state, pos) {
@@ -4029,7 +4086,11 @@ function buildDecorations(view) {
       } else {
         builder.add(start, innerStart, conceal);
         builder.add(innerStart, innerEnd, mark);
-        builder.add(innerEnd, end, conceal);
+        builder.add(
+          innerEnd,
+          end,
+          h.className === "tufte-leadin" ? leadinIndentConceal : conceal
+        );
       }
     }
   }

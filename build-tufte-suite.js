@@ -35,7 +35,7 @@ const MODULE_ROOTS = [
 
 const SUITE_ID = "tufte-suite";
 const SUITE_NAME = "Tufte Suite";
-const SUITE_VERSION = "1.0.0";
+const SUITE_VERSION = "1.0.1";
 const BUILD_DATE = "2026-08-05";
 
 // Order == the four plugins' relative order in community-plugins.json
