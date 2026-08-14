@@ -69,3 +69,9 @@ Built alongside the [Tufte for Obsidian](https://github.com/PleiadesM/TufteObsid
 ## License
 
 [MIT](LICENSE) © 2026 Daocheng Lin.
+
+## Changelog
+
+- **1.0.2** (2026-08-14) — tufte-figures 1.7.3: the default figure's margin caption becomes a float using the sidenotes' exact recipe, so captions and sidenotes stack in one `clear:right` queue — a sidenote near a figure can no longer overlap the caption — and both share the same left edge (the old grid column sat 2cqi further left). The caption still starts level with its image; Live Preview and panes under 760px keep image-above-caption. Pair with theme [Tufte 1.16.3](https://github.com/PleiadesM/TufteObsidian/releases/tag/1.16.3) for the print-side geometry. Other modules unchanged.
+- **1.0.1** (2026-08-11) — tufte-inline 1.2.1: the `&&…&&` / `^^…^^` / `@@…@@` shorthands survive nested markup (`[[links]]`, bold, italic) in Reading view, and the Live Preview lead-in indent rides a concealed-delimiter widget. Ships with theme Tufte 1.16.1.
+- **1.0.0** (2026-08-05) — first release: the four standalone Tufte plugins (backlinks 1.0.1, figures 1.7.2, inline 1.2.0, sidenotes 1.7.0) bundled as switchable modules with namespaced settings, a single settings tab, and one-time import of standalone settings and the quilt store.

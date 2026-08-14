@@ -1,9 +1,9 @@
 /* ============================================================================
- * Tufte Suite 1.0.1 - the four Tufte plugins bundled as one plugin.
+ * Tufte Suite 1.0.2 - the four Tufte plugins bundled as one plugin.
  *
- * GENERATED FILE - built 2026-08-05 by build-tufte-suite.js from:
+ * GENERATED FILE - built 2026-08-14 by build-tufte-suite.js from:
  *   tufte-backlinks 1.0.1     (embedded verbatim)
- *   tufte-figures 1.7.2       (embedded with ONE patch: quilt store path -> plugins/tufte-suite/quilts)
+ *   tufte-figures 1.7.3       (embedded with ONE patch: quilt store path -> plugins/tufte-suite/quilts)
  *   tufte-inline 1.2.1        (embedded verbatim)
  *   tufte-sidenotes 1.7.0     (embedded verbatim)
  *
@@ -581,10 +581,10 @@ defineSubmodule({
   key: "figures",
   id: "tufte-figures",
   name: "Tufte Figures",
-  version: "1.7.2",
+  version: "1.7.3",
   blurb: "Column, full-width and margin figures, captions, quilts, lightbox and references."
 }, function (module, exports, require) {
-/*<<<TUFTE-SUITE:BEGIN tufte-figures/main.js v1.7.2>>>*/
+/*<<<TUFTE-SUITE:BEGIN tufte-figures/main.js v1.7.3>>>*/
 const {
   MarkdownRenderer,
   Plugin,
@@ -2237,8 +2237,18 @@ async function renderMultiFigure(callout, content, ctx, app, component, calloutT
   }
 
   emptyElement(content);
-  content.appendChild(imageHolder);
-  content.appendChild(captionHolder);
+  if (perCellCaption) {
+    // Modes 2/3: captions sit under their images; keep image-first order.
+    content.appendChild(imageHolder);
+    content.appendChild(captionHolder);
+  } else {
+    // Mode 1: the caption holder floats into the margin, and float
+    // placement follows source order — it must PRECEDE the image row to
+    // start level with it (styles.css restores image→caption visual order
+    // where the float collapses: Live Preview and panes ≤760px).
+    content.appendChild(captionHolder);
+    content.appendChild(imageHolder);
+  }
 
   callout.classList.add("tufte-fig-multi");
   callout.classList.add("tufte-fig-sized"); // entries carry native widths
@@ -2338,8 +2348,12 @@ async function decorateDefaultFigure(callout, ctx, app, component, sectionEl) {
     if (labelInserted) titleEl?.classList.add("tufte-figure-title-hidden");
 
     emptyElement(content);
-    content.appendChild(imageHolder);
+    // The caption holder floats into the margin, and float placement
+    // follows source order — it must PRECEDE the image block to start
+    // level with it (styles.css restores image→caption visual order
+    // where the float collapses: Live Preview and panes ≤760px).
     content.appendChild(captionHolder);
+    content.appendChild(imageHolder);
 
     callout.dataset.tufteFigureDecorated = "1";
   } catch (err) {

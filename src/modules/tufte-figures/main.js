@@ -1650,8 +1650,18 @@ async function renderMultiFigure(callout, content, ctx, app, component, calloutT
   }
 
   emptyElement(content);
-  content.appendChild(imageHolder);
-  content.appendChild(captionHolder);
+  if (perCellCaption) {
+    // Modes 2/3: captions sit under their images; keep image-first order.
+    content.appendChild(imageHolder);
+    content.appendChild(captionHolder);
+  } else {
+    // Mode 1: the caption holder floats into the margin, and float
+    // placement follows source order — it must PRECEDE the image row to
+    // start level with it (styles.css restores image→caption visual order
+    // where the float collapses: Live Preview and panes ≤760px).
+    content.appendChild(captionHolder);
+    content.appendChild(imageHolder);
+  }
 
   callout.classList.add("tufte-fig-multi");
   callout.classList.add("tufte-fig-sized"); // entries carry native widths
@@ -1751,8 +1761,12 @@ async function decorateDefaultFigure(callout, ctx, app, component, sectionEl) {
     if (labelInserted) titleEl?.classList.add("tufte-figure-title-hidden");
 
     emptyElement(content);
-    content.appendChild(imageHolder);
+    // The caption holder floats into the margin, and float placement
+    // follows source order — it must PRECEDE the image block to start
+    // level with it (styles.css restores image→caption visual order
+    // where the float collapses: Live Preview and panes ≤760px).
     content.appendChild(captionHolder);
+    content.appendChild(imageHolder);
 
     callout.dataset.tufteFigureDecorated = "1";
   } catch (err) {

@@ -1,4 +1,4 @@
-/* Tufte Suite 1.0.1 - GENERATED 2026-08-05 by build-tufte-suite.js.
+/* Tufte Suite 1.0.2 - GENERATED 2026-08-14 by build-tufte-suite.js.
    Concatenation of the standalone plugins' styles.css in load order:
    tufte-backlinks, tufte-figures, tufte-sidenotes.
    (tufte-inline has no styles.css; its styling lives in the Tufte theme.)
@@ -166,7 +166,7 @@
   display: none;
 }
 
-/* ═══════════ tufte-figures 1.7.2 styles.css ═══════════ */
+/* ═══════════ tufte-figures 1.7.3 styles.css ═══════════ */
 
 /* ============================================================================
    Tufte Figures plugin styles
@@ -178,8 +178,16 @@
 
    Modes:
     1. [!figure]       — image in the text column, caption + "Fig. N."
-                         placed in the right margin by a two-column grid.
-                         The postprocessor builds canonical image/caption
+                         FLOATED into the right margin with the sidenote
+                         plugin's exact recipe (float/clear right, 22cqi,
+                         −24cqi pull), so captions and sidenotes stack in
+                         one clear:right queue — no more overlap — and
+                         share the same left edge. (A two-column grid
+                         until 2026-08-13: grid columns neither clear
+                         floats nor get cleared, so a nearby sidenote
+                         overlapped the caption, and the grid's caption
+                         edge sat 2cqi left of the sidenotes'.)
+                         The postprocessor builds canonical caption/image
                          containers and folds the callout title into the
                          caption as a red italic label.
      2. [!figure-full]  — image spans the column + right gutter; the title
@@ -220,30 +228,43 @@ body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"
 }
 
 /* The postprocessor replaces Obsidian's fragile paragraph soup with two
-   canonical direct children: image holder and caption holder. CSS only
-   targets those plugin-owned containers for default figures. */
+   canonical direct children — caption holder FIRST, then image holder.
+   Float placement follows source order: a right float that PRECEDES the
+   image block starts at the content top, level with the image; one that
+   followed it would start below. CSS only targets those plugin-owned
+   containers for default figures. */
 body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content {
   padding: 0 !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 22cqi !important;   /* caption column = 22% of the pane */
-  column-gap: 1rem !important;
-  margin-right: -22cqi !important;                          /* shift the caption column into the gutter (proportional) */
-  align-items: start !important;
+  display: block !important;      /* was a 2-column grid; the caption now floats */
+  margin-right: 0 !important;     /* the caption pulls itself into the gutter */
+  /* app.css pairs the overflow axes on callout-content, making it a scroll
+     container — that would establish a BFC that traps and clips the caption
+     float. Open it up (the theme's print block applies the same cure). */
+  overflow: visible !important;
 }
 
 /* Image holder: canonical main-column container. */
 body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-image-holder {
-  grid-column: 1 !important;
-  grid-row: 1 !important;
   margin: 0 !important;
   min-width: 0 !important;
 }
 
-/* Caption holder: canonical side-column container. */
+/* Caption holder: floated into the margin with the sidenote plugin's EXACT
+   recipe (see tufte-sidenotes/styles.css) — float/clear right, 22cqi wide,
+   −24cqi pull, 1rem stand-off. Sharing the recipe is the whole fix:
+     · clear:right makes every margin occupant — sidenote, marginnote,
+       margin figure, this caption — queue below the previous one, so a
+       sidenote near a figure can no longer overlap the caption;
+     · identical width/margin math lands the caption's text on the same
+       left edge as the sidenotes' (the old grid column started at the
+       text edge, 2cqi further left — the misalignment users saw).
+   Only the top margin differs (0.1rem, not 0.3rem): it optically aligns
+   the caption's first line with the top of its image. */
 body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-caption-holder {
-  grid-column: 2 !important;
-  grid-row: 1 !important;
-  margin: 0.1rem 0 !important;
+  float: right !important;
+  clear: right !important;
+  width: 22cqi !important;
+  margin: 0.1rem -24cqi 1rem 1rem !important;
   color: var(--tufte-muted) !important;
   font-size: 0.85em !important;
   line-height: 1.4 !important;
@@ -482,6 +503,18 @@ body.tufte-figures-enabled .markdown-source-view.mod-cm6 .tufte-fig-label {
    caption is present in the same holder, the caption text remains visible. */
 body.tufte-figures-enabled .markdown-source-view .callout[data-callout="figure"] .tufte-fig-label {
   display: none !important;
+}
+
+/* The canonical DOM puts the caption holder before the image holder (float
+   source order in Reading view). The editor renders figure callouts as
+   ordinary callouts, so restore the visual image→caption order there;
+   `order: 9` keeps the caption last even beside undecorated leftovers. */
+body.tufte-figures-enabled .markdown-source-view .callout[data-callout="figure"] .callout-content {
+  display: flex !important;
+  flex-direction: column !important;
+}
+body.tufte-figures-enabled .markdown-source-view .callout[data-callout="figure"] .callout-content > .tufte-fig-caption-holder {
+  order: 9;
 }
 
 /* Full-width figures are intentionally dramatic in Reading view, but that
@@ -814,12 +847,20 @@ body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="marginn
    tracks the pane even with the sidebars open. ----------------------------- */
 
 @container tufte-pane (max-width: 760px) {
-  /* Default figure: collapse the canonical containers into one column. */
+  /* Default figure: collapse the canonical containers into one column.
+     Flex (not block) because the canonical DOM puts the caption holder
+     first for float source order; `order` restores image-above-caption
+     once the caption stops floating. */
   body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     margin-right: 0 !important;
   }
   body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="figure"] .callout-content > .tufte-fig-caption-holder {
+    float: none !important;
+    clear: none !important;
+    width: auto !important;
+    order: 9;
     margin: 0.4rem 0 !important;
   }
   /* Full-width figure: stop spilling into the (now absent) gutter. */
