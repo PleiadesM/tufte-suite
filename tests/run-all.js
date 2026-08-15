@@ -9,7 +9,8 @@ const TESTS = [
   ["t6-toggles", "./t6-toggles"],
   ["t7-unload", "./t7-unload"],
   ["t8-baseline", "./t8-baseline"],
-  ["t9-reload-race", "./t9-reload-race"]
+  ["t9-reload-race", "./t9-reload-race"],
+  ["t10-typefaces", "./t10-typefaces"]
 ];
 
 const only = process.argv[2];

@@ -31,7 +31,7 @@ and evaluated with `new Function(...)`; nothing under the vault is ever written.
 | `harness/load.js` | Reads plugin files as text, evaluates them in sloppy mode with the fake `require` and the shadowed globals. |
 | `harness/fixtures.js` | The fixture corpus (pure data; each env builds its own identical copy). |
 | `harness/assert.js` | Tiny assertion helpers with readable diffs. |
-| `t1…t9`, `run-all.js` | The tests. |
+| `t1…t10`, `run-all.js` | The tests. |
 
 ---
 
@@ -202,6 +202,39 @@ a failed reload does not poison the chain. **t9** drives the real settings-tab
 toggles concurrently — two different modules off, both back on, then one module
 off+on with no gap — and asserts one instance per module, canonical order, exact
 command/listener/extension counts, and `_children` agreeing with `loadedSubs`.
+
+**t10** covers the suite-level "Typefaces (Tufte theme)" section (added
+2026-08-14): a Latin/Chinese in-page tab bar (a plugin gets exactly one
+sidebar settings entry, so sub-navigation lives inside the page) over eight
+settings — Latin serif/sans faces and weights, plus the two Chinese
+companions (宋体/黑体; Kaiti is deliberately not settable), each with a face
+row and a FIXED-weight row. A fixed Chinese weight is implemented as a
+synthesized @font-face remap family in a suite-owned `<style>` — local()
+references to named cuts serving run weights 100–500 with the chosen cut
+and 600–900 with the cut two steps up (so strong keeps its step) — and t10
+asserts the fronted knob value, the injected css (named cuts from the
+weight tables), coexistence of both series, pruning when weights return to
+follow-Latin, re-injection on a seeded load, and removal on unload. It also
+asserts the defaults
+(no inline body styles, every control at "Theme default", the full option
+counts including all nine weights and the "Other…" rows), that bundled Cabin
+is offered and the removed Johnston / Gill Sans Nova options are gone, that
+the Source Han presets keep the system chains behind them and apply only to
+their own knob, that choosing a value writes the knob as an inline body
+style and persists it under the reserved `__typefaces` key (beside
+`__modules`, never colliding with a module namespace), the whole "Other…"
+flow in both shapes — a PICKER of the user's installed fonts when they can
+be enumerated (a stubbed `window.queryLocalFonts` env: deduplicated, sorted
+families; a pick leads the applied stack; the CHINESE knobs' picker filters
+to Chinese-capable families, exercised here via the name heuristic since
+jsdom has no FontFace — the primary probe, a 636-byte embedded blank font
+that turns glyph coverage into a width-zero test, is validated against real
+fonts in the Chrome replication harness) and the typed-name fallback where
+they cannot (the plain jsdom env), each composing the family over the
+theme's default chain, with leaving Other clearing the name and its row —
+that returning to "Theme default" removes the style and prunes the storage,
+that saved knobs — composed customs included — re-apply on a fresh load, and
+that unloading the plugin removes every inline knob.
 
 ### No behavioural differences found
 

@@ -1,8 +1,24 @@
-/* Tufte Suite 1.0.2 - GENERATED 2026-08-14 by build-tufte-suite.js.
-   Concatenation of the standalone plugins' styles.css in load order:
+/* Tufte Suite 1.1.0 - GENERATED 2026-08-14 by build-tufte-suite.js.
+   One suite-level block (the settings tab bar), then a concatenation of
+   the standalone plugins' styles.css in load order:
    tufte-backlinks, tufte-figures, tufte-sidenotes.
    (tufte-inline has no styles.css; its styling lives in the Tufte theme.)
-   Do not hand-edit; fix the standalone plugin's styles.css and regenerate. */
+   Do not hand-edit; fix the generator (suite block) or the standalone
+   plugin's styles.css and regenerate. */
+
+/* ═══════════ suite-level: the Typefaces Latin/Chinese tab bar ═══════════ */
+
+.tufte-suite-typeface-tabs {
+  display: flex;
+  gap: var(--size-4-2);
+  margin: var(--size-4-2) 0 var(--size-4-3);
+}
+.tufte-suite-typeface-tabs .tufte-suite-typeface-tab.is-active {
+  border-bottom: 2px solid var(--interactive-accent);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  font-weight: var(--font-semibold);
+}
 
 /* ═══════════ tufte-backlinks 1.0.1 styles.css ═══════════ */
 
