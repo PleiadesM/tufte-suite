@@ -1,4 +1,4 @@
-/* Tufte Suite 1.1.0 - GENERATED 2026-08-14 by build-tufte-suite.js.
+/* Tufte Suite 1.2.0 - GENERATED 2026-08-14 by build-tufte-suite.js.
    One suite-level block (the settings tab bar), then a concatenation of
    the standalone plugins' styles.css in load order:
    tufte-backlinks, tufte-figures, tufte-sidenotes.
@@ -182,7 +182,7 @@
   display: none;
 }
 
-/* ═══════════ tufte-figures 1.7.3 styles.css ═══════════ */
+/* ═══════════ tufte-figures 1.8.0 styles.css ═══════════ */
 
 /* ============================================================================
    Tufte Figures plugin styles
@@ -585,25 +585,20 @@ body.tufte-figures-enabled .markdown-preview-view a.internal-link[data-href*="#^
 
 /* ---- Modal: tabs + multi-image entry list ------------------------------- */
 
+/* Same tab grammar as the Suite settings' Latin/中文 bar
+   (.tufte-suite-typeface-tabs): native buttons, the active one
+   carrying a 2px accent underline and semibold weight — one tab
+   design across the whole Suite. */
 .tufte-figure-modal .tufte-fig-tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--size-4-2);
   margin: 0 0 0.9rem 0;
-  border-bottom: 1px solid var(--background-modifier-border);
-}
-.tufte-figure-modal .tufte-fig-tabs button {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0.35rem 0.2rem;
-  margin-bottom: -1px;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
 }
 .tufte-figure-modal .tufte-fig-tabs button.is-active {
-  color: var(--text-normal);
-  border-bottom-color: var(--interactive-accent);
+  border-bottom: 2px solid var(--interactive-accent);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  font-weight: var(--font-semibold);
 }
 .tufte-figure-modal .tufte-fig-multi-hint {
   margin: 0 0 0.6rem 0;
@@ -910,7 +905,7 @@ body.tufte-figures-enabled .markdown-preview-view .callout[data-callout="marginn
   }
 }
 
-/* ═══════════ tufte-sidenotes 1.7.0 styles.css ═══════════ */
+/* ═══════════ tufte-sidenotes 1.8.0 styles.css ═══════════ */
 
 /* ============================================================================
    Tufte Sidenotes plugin styles

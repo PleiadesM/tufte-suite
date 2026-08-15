@@ -35,7 +35,7 @@ const MODULE_ROOTS = [
 
 const SUITE_ID = "tufte-suite";
 const SUITE_NAME = "Tufte Suite";
-const SUITE_VERSION = "1.1.0";
+const SUITE_VERSION = "1.2.0";
 const BUILD_DATE = "2026-08-14";
 
 // Order == the four plugins' relative order in community-plugins.json
@@ -214,6 +214,94 @@ const RUNTIME = `
 
 const MODULES_KEY = "__modules";
 const TYPEFACES_KEY = "__typefaces";
+
+/* ── Simplified Chinese UI strings ───────────────────────────────────────
+ * Keyed by the exact English literal; tzh() falls back to its input, so the
+ * English behaviour is byte-identical by construction. The lookup is lazy
+ * (localStorage is read per call) so a language change takes effect on the
+ * next re-render without reloading the plugin. Module display names
+ * ("Tufte Figures", …) are product names and stay English. */
+const TUFTE_ZH = {
+  "Tufte Suite: ": "Tufte Suite：",
+  "Bundled plugins": "捆绑的插件",
+  "Tufte Suite bundles the four standalone Tufte plugins as switchable modules. Keep the standalone plugins disabled while Tufte Suite is enabled, or everything renders twice. Toggling a module applies immediately.": "Tufte Suite 将四个独立的 Tufte 插件捆绑为可开关的模块。启用 Tufte Suite 时请保持这些独立插件处于禁用状态，否则所有内容会渲染两次。切换模块会立即生效。",
+  "Backlink and mention snippets rendered as formatted Markdown.": "以带格式的 Markdown 渲染反向链接与提及片段。",
+  "Column, full-width and margin figures, captions, quilts, lightbox and references.": "正文栏图、通栏图与边栏图，图注、图像拼图、灯箱与引用。",
+  "Inline shorthands: ^^new thought^^, &&lead-in&&, @@CJK drop cap@@.": "行内简写：^^新思路^^、&&引导词&&、@@中文首字下沉@@。",
+  "Sidenotes and marginnotes in Reading view.": "阅读视图中的旁注与边注。",
+  'Tufte Suite: module "': "Tufte Suite：模块 “",
+  '" failed to load - see developer console.': "” 加载失败 — 请查看开发者控制台。",
+  "Typefaces (Tufte theme)": "字体（Tufte 主题）",
+  "Faces and weights for the Tufte theme's two type series — the serif reading register and the sans data/interface register. Changes apply immediately and persist with the Suite's settings; 'Theme default' hands a knob back to the theme. Chinese companion faces follow automatically. Requires the Tufte theme (inert under any other theme).": "Tufte 主题两套字体系列的字体与字重 — 衬线阅读语境与无衬线数据／界面语境。修改会立即生效并随 Suite 设置一同保存；选择“主题默认”即把该项交还给主题。中文伴随字体会自动跟随。需要 Tufte 主题（在其他主题下无效）。",
+  "Latin · 西文": "西文",
+  "Chinese · 中文": "中文",
+  // typeface knob names
+  "Serif — reading face": "衬线 — 正文阅读字体",
+  "Serif — reading weight": "衬线 — 正文字重",
+  "Sans — data & interface face": "无衬线 — 数据与界面字体",
+  "Sans — data & interface weight": "无衬线 — 数据与界面字重",
+  "Chinese — serif companion (宋体)": "中文衬线（宋体）",
+  "Chinese serif — weight (宋体字重)": "中文衬线字重（宋体）",
+  "Chinese — sans companion (黑体)": "中文无衬线（黑体）",
+  "Chinese sans — weight (黑体字重)": "中文无衬线字重（黑体）",
+  // typeface knob descriptions
+  "Body text, headings, tables, captions. The theme default, et-book (bundled with the theme), is the digital Bembo of Tufte's own books; the alternatives are Monotype book faces in the same tradition, and every one of them falls back to et-book when not installed.": "正文、标题、表格、图注。主题默认的 et-book（随主题内置）是 Tufte 本人著作所用 Bembo 的数字版；备选项均为同一传统下的 Monotype 书籍字体，未安装时都会回退到 et-book。",
+  "The weight body text is set at; bold always sits one step (+200) above it. Faces snap to their nearest real cut — et-book ships Regular and Bold only, so 600 already reads as Bold.": "正文所用的字重；粗体始终比它高一档（+200）。字体会吸附到最接近的实际刻版 — et-book 只提供常规与粗体，因此 600 已呈现为粗体。",
+  "Task lists, tags, backlinks, Bases, table titles, and the application interface. Gill Sans is the sans of Beautiful Evidence. Cabin — the Johnston–Gill school, bundled inside the theme as a variable font with true 400–700 weights — renders on every machine; the other recommendations are system faces.": "任务列表、标签、反向链接、Bases、表格标题以及应用界面。Gill Sans 是《美丽的证据》所用的无衬线体。Cabin — Johnston–Gill 一脉，作为可变字体内置于主题中，具备真实的 400–700 字重 — 在任何机器上都能显示；其余推荐项为系统字体。",
+  "One weight for the whole sans series, this window included; the H5 table title keeps its own +200 step above it. macOS Gill Sans ships 300/400/600/700/800; requests between cuts snap to the nearest one.": "整个无衬线系列（包括本窗口）统一使用的字重；H5 表格标题仍保持其 +200 的加粗档位。macOS 的 Gill Sans 提供 300/400/600/700/800；介于刻版之间的请求会吸附到最接近的一档。",
+  "The Chinese face behind the Latin serif: body text, headings, tables. The default is the system Song chain (Songti SC / SimSun); Source Han Serif 思源宋体 is the open pan-CJK alternative. The serif reading weight reaches it too. Italic contexts keep Kaiti 楷体 by design.": "西文衬线体背后的中文字体：正文、标题、表格。默认使用系统宋体链（Songti SC / SimSun）；思源宋体 Source Han Serif 是开源的泛中日韩备选项。衬线正文字重同样作用于它。斜体语境按设计固定使用楷体。",
+  "A FIXED weight for Chinese serif text, independent of the Latin knobs: the Suite maps every run weight onto the cut you choose (bold Chinese keeps a +200 step), via named cuts — Songti ships Light/Regular/Bold/Black, 思源宋体 the full range; requests between cuts take the nearest named one. The default keeps today's behavior: Chinese follows the Latin weights.": "中文衬线文字的固定字重，独立于西文的字重旋钮：Suite 会把每一段文字的运行字重映射到你选择的刻版上（中文粗体保持 +200 的档位差），通过具名刻版实现 — 宋体提供 Light/Regular/Bold/Black，思源宋体提供全字重；介于刻版之间的请求取最接近的具名刻版。默认保持当前行为：中文跟随西文字重。",
+  "The Chinese face behind the sans/data register: task lists, tags, Bases, the interface. The default is the system Hei chain (PingFang SC / Microsoft YaHei); Source Han Sans 思源黑体 is the open pan-CJK alternative. The sans weight reaches it too.": "无衬线／数据语境背后的中文字体：任务列表、标签、Bases、界面。默认使用系统黑体链（PingFang SC / Microsoft YaHei）；思源黑体 Source Han Sans 是开源的泛中日韩备选项。无衬线字重同样作用于它。",
+  "A FIXED weight for Chinese in the data register, independent of the Latin knobs; bold keeps a +200 step. PingFang ships Ultralight through Semibold, 思源黑体 the full range; requests between cuts take the nearest named one. The default keeps today's behavior: Chinese follows the Latin weights.": "数据语境中文的固定字重，独立于西文的字重旋钮；粗体保持 +200 的档位差。苹方提供 Ultralight 至 Semibold，思源黑体提供全字重；介于刻版之间的请求取最接近的具名刻版。默认保持当前行为：中文跟随西文字重。",
+  // "Other…" companion rows
+  "Serif — your own font": "衬线 — 自定义字体",
+  "Sans — your own font": "无衬线 — 自定义字体",
+  "Chinese serif — your own font": "中文衬线 — 自定义字体",
+  "Chinese sans — your own font": "中文无衬线 — 自定义字体",
+  // default-label / option rows
+  "Theme default — et-book, Tufte's Bembo": "主题默认 — et-book，Tufte 的 Bembo",
+  "Theme default — 400 · Regular": "主题默认 — 400 · 常规",
+  "Theme default — Gill Sans, Beautiful Evidence": "主题默认 — Gill Sans，《美丽的证据》用字",
+  "Theme default — Songti 宋体 (system chain)": "主题默认 — 宋体（系统字体链）",
+  "Theme default — PingFang 苹方 (system chain)": "主题默认 — 苹方（系统字体链）",
+  "Follow the Latin weights (theme default)": "跟随西文字重（主题默认）",
+  "Other — a font installed on your system…": "其他 — 你系统中已安装的字体…",
+  "Bembo — the printed books' face (Monotype)": "Bembo — 印刷书籍所用的字体（Monotype）",
+  "Plantin (Monotype)": "Plantin（Monotype）",
+  "Perpetua — Eric Gill's serif (Monotype)": "Perpetua — Eric Gill 的衬线体（Monotype）",
+  "Baskerville (Monotype cut)": "Baskerville（Monotype 刻版）",
+  "Cabin — the Johnston–Gill school, bundled (true 400–700)": "Cabin — Johnston–Gill 一脉，随主题内置（真实 400–700 字重）",
+  "Optima — Zapf's humanist (macOS)": "Optima — Zapf 的人文主义无衬线（macOS）",
+  "Seravek (macOS)": "Seravek（macOS）",
+  "Trebuchet MS (everywhere)": "Trebuchet MS（通用）",
+  "Source Han Serif 思源宋体 (open, all weights)": "思源宋体 Source Han Serif（开源，全字重）",
+  "LXGW WenKai 霞鹜文楷 (open, kaiti-flavored)": "霞鹜文楷 LXGW WenKai（开源，楷体风格）",
+  "Source Han Sans 思源黑体 (open, all weights)": "思源黑体 Source Han Sans（开源，全字重）",
+  "100 — Thin": "100 — 极细",
+  "200 — Extra Light": "200 — 特细",
+  "300 — Light": "300 — 细体",
+  "400 — Regular": "400 — 常规",
+  "500 — Medium": "500 — 中等",
+  "600 — Semibold": "600 — 半粗",
+  "700 — Bold": "700 — 粗体",
+  "800 — Extra Bold": "800 — 特粗",
+  "900 — Black": "900 — 浓黑",
+  // font picker
+  "Reading your installed fonts…": "正在读取你已安装的字体…",
+  "Your installed Chinese fonts — the system list filtered to families that can actually set Chinese text. The theme's default chain stays behind the choice as fallback.": "你已安装的中文字体 — 从系统列表中筛选出真正能排布中文的字族。主题的默认字体链仍作为回退保留在所选字体之后。",
+  "Your installed fonts — the same list as Settings → Appearance → Font. The theme's default chain stays behind the choice as fallback, and the Chinese companion faces still apply.": "你已安装的字体 — 与「设置 → 外观 → 字体」中相同的列表。主题的默认字体链仍作为回退保留在所选字体之后，中文伴随字体依然生效。",
+  "Your fonts could not be listed here — type the family name exactly as your system knows it (browse what is installed under Settings → Appearance → Font). The theme's default chain stays behind it as fallback, and the Chinese companion faces still apply.": "无法在此列出你的字体 — 请按系统中的名称准确输入字族名（可在「设置 → 外观 → 字体」中浏览已安装的字体）。主题的默认字体链仍作为回退保留在其后，中文伴随字体依然生效。",
+  "— pick a font —": "— 选择字体 —",
+  "(not found on this system)": "（此系统中未找到）",
+  "e.g. Avenir Next": "例如 Avenir Next"
+};
+function tzh(s) {
+  try {
+    var l = window.localStorage.getItem("language");
+    if (l && String(l).toLowerCase().indexOf("zh") === 0) return TUFTE_ZH[s] || s;
+  } catch (e) {}
+  return s;
+}
 
 /* ── Typefaces (Tufte theme) ────────────────────────────────────────────
  * The GUI for the Tufte theme's typeface knobs — two Latin series (face
@@ -526,19 +614,20 @@ class TufteSuiteSettingTab extends obsidian.PluginSettingTab {
     const containerEl = this.containerEl;
     containerEl.empty();
 
-    new obsidian.Setting(containerEl).setName("Bundled plugins").setHeading();
+    new obsidian.Setting(containerEl).setName(tzh("Bundled plugins")).setHeading();
     containerEl.createEl("p", {
       cls: "setting-item-description",
-      text:
+      text: tzh(
         "Tufte Suite bundles the four standalone Tufte plugins as switchable modules. " +
-        "Keep the standalone plugins disabled while Tufte Suite is enabled, or " +
-        "everything renders twice. Toggling a module applies immediately."
+          "Keep the standalone plugins disabled while Tufte Suite is enabled, or " +
+          "everything renders twice. Toggling a module applies immediately."
+      )
     });
 
     for (const def of SUBMODULES) {
       new obsidian.Setting(containerEl)
         .setName(def.name)
-        .setDesc(def.blurb)
+        .setDesc(tzh(def.blurb))
         .addToggle((t) =>
           t.setValue(this.plugin.isModuleEnabled(def.key)).onChange(async (v) => {
             await this.plugin.setModuleEnabled(def.key, v);
@@ -561,21 +650,22 @@ class TufteSuiteSettingTab extends obsidian.PluginSettingTab {
     // one tab per plugin id), so sub-navigation lives inside the page. NB:
     // every wrapper here carries a class — the one bare classless <div>
     // per section is reserved for the sub-plugin tabs above.
-    new obsidian.Setting(containerEl).setName("Typefaces (Tufte theme)").setHeading();
+    new obsidian.Setting(containerEl).setName(tzh("Typefaces (Tufte theme)")).setHeading();
     containerEl.createEl("p", {
       cls: "setting-item-description",
-      text:
+      text: tzh(
         "Faces and weights for the Tufte theme's two type series — the serif " +
-        "reading register and the sans data/interface register. Changes apply " +
-        "immediately and persist with the Suite's settings; 'Theme default' " +
-        "hands a knob back to the theme. Chinese companion faces follow " +
-        "automatically. Requires the Tufte theme (inert under any other theme)."
+          "reading register and the sans data/interface register. Changes apply " +
+          "immediately and persist with the Suite's settings; 'Theme default' " +
+          "hands a knob back to the theme. Chinese companion faces follow " +
+          "automatically. Requires the Tufte theme (inert under any other theme)."
+      )
     });
 
     if (!this.typefaceTab) this.typefaceTab = "latin";
     const tabsEl = containerEl.createDiv({ cls: "tufte-suite-typeface-tabs" });
     for (const t of [["latin", "Latin \u00b7 \u897f\u6587"], ["cjk", "Chinese \u00b7 \u4e2d\u6587"]]) {
-      const btn = tabsEl.createEl("button", { text: t[1], cls: "tufte-suite-typeface-tab" });
+      const btn = tabsEl.createEl("button", { text: tzh(t[1]), cls: "tufte-suite-typeface-tab" });
       if (this.typefaceTab === t[0]) btn.addClass("is-active");
       btn.addEventListener("click", () => {
         this.typefaceTab = t[0];
@@ -587,12 +677,12 @@ class TufteSuiteSettingTab extends obsidian.PluginSettingTab {
     for (const def of TYPEFACE_SETTINGS) {
       if (def.tab !== this.typefaceTab) continue;
       new obsidian.Setting(paneEl)
-        .setName(def.name)
-        .setDesc(def.desc)
+        .setName(tzh(def.name))
+        .setDesc(tzh(def.desc))
         .addDropdown((d) => {
-          d.addOption("", def.defaultLabel);
-          for (const opt of def.options) d.addOption(opt[0], opt[1]);
-          if (def.customKey) d.addOption(CUSTOM_FACE, "Other — a font installed on your system…");
+          d.addOption("", tzh(def.defaultLabel));
+          for (const opt of def.options) d.addOption(opt[0], tzh(opt[1]));
+          if (def.customKey) d.addOption(CUSTOM_FACE, tzh("Other — a font installed on your system…"));
           d.setValue(this.plugin.getTypeface(def.key));
           d.onChange(async (v) => {
             // Leaving "Other" clears the paired custom name, so storage
@@ -619,32 +709,36 @@ class TufteSuiteSettingTab extends obsidian.PluginSettingTab {
       // paint that arrives before the list has been read (e.g. reopening
       // settings with a saved "Other" choice).
       if (def.customKey && this.plugin.getTypeface(def.key) === CUSTOM_FACE) {
-        const row = new obsidian.Setting(paneEl).setName(def.customName);
+        const row = new obsidian.Setting(paneEl).setName(tzh(def.customName));
         const fonts = def.customFilter === "cjk" ? this.plugin.chineseFonts : this.plugin.systemFonts;
         if (fonts === null) {
-          row.setDesc("Reading your installed fonts…");
+          row.setDesc(tzh("Reading your installed fonts…"));
           this.plugin.listFontsFor(def).then(() => this.display());
         } else if (fonts.length) {
           row
             .setDesc(
               def.customFilter === "cjk"
-                ? "Your installed Chinese fonts — the system list filtered " +
-                  "to families that can actually set Chinese text. The " +
-                  "theme's default chain stays behind the choice as fallback."
-                : "Your installed fonts — the same list as Settings → " +
-                  "Appearance → Font. The theme's default chain stays behind " +
-                  "the choice as fallback, and the Chinese companion faces " +
-                  "still apply."
+                ? tzh(
+                    "Your installed Chinese fonts — the system list filtered " +
+                      "to families that can actually set Chinese text. The " +
+                      "theme's default chain stays behind the choice as fallback."
+                  )
+                : tzh(
+                    "Your installed fonts — the same list as Settings → " +
+                      "Appearance → Font. The theme's default chain stays behind " +
+                      "the choice as fallback, and the Chinese companion faces " +
+                      "still apply."
+                  )
             )
             .addDropdown((d) => {
-              d.addOption("", "— pick a font —");
+              d.addOption("", tzh("— pick a font —"));
               const current = this.plugin.getTypeface(def.customKey);
               let listed = false;
               for (const fam of fonts) {
                 d.addOption(fam, fam);
                 if (fam === current) listed = true;
               }
-              if (current && !listed) d.addOption(current, current + " (not found on this system)");
+              if (current && !listed) d.addOption(current, current + " " + tzh("(not found on this system)"));
               d.setValue(current);
               d.onChange(async (v) => {
                 await this.plugin.setTypeface(def.customKey, v);
@@ -653,14 +747,16 @@ class TufteSuiteSettingTab extends obsidian.PluginSettingTab {
         } else {
           row
             .setDesc(
-              "Your fonts could not be listed here — type the family name " +
-              "exactly as your system knows it (browse what is installed " +
-              "under Settings → Appearance → Font). The theme's default " +
-              "chain stays behind it as fallback, and the Chinese " +
-              "companion faces still apply."
+              tzh(
+                "Your fonts could not be listed here — type the family name " +
+                  "exactly as your system knows it (browse what is installed " +
+                  "under Settings → Appearance → Font). The theme's default " +
+                  "chain stays behind it as fallback, and the Chinese " +
+                  "companion faces still apply."
+              )
             )
             .addText((t) => {
-              t.setPlaceholder("e.g. Avenir Next");
+              t.setPlaceholder(tzh("e.g. Avenir Next"));
               t.setValue(this.plugin.getTypeface(def.customKey));
               t.onChange(async (v) => {
                 await this.plugin.setTypeface(def.customKey, v);
@@ -984,7 +1080,9 @@ module.exports = class TufteSuitePlugin extends obsidian.Plugin {
       } catch (e) {
         console.error("Tufte Suite: failed to load module " + def.id, e);
         new obsidian.Notice(
-          'Tufte Suite: module "' + def.name + '" failed to load - see developer console.'
+          tzh('Tufte Suite: module "') +
+            def.name +
+            tzh('" failed to load - see developer console.')
         );
       }
     }
@@ -1098,12 +1196,16 @@ module.exports = class TufteSuitePlugin extends obsidian.Plugin {
       const dupes = SUBMODULES.filter((d) => enabled.has(d.id)).map((d) => d.name);
       if (dupes.length) {
         new obsidian.Notice(
-          "Tufte Suite: " +
-            dupes.join(", ") +
-            (dupes.length > 1 ? " are" : " is") +
-            " also enabled standalone. Disable the standalone version" +
-            (dupes.length > 1 ? "s" : "") +
-            " to avoid double rendering.",
+          tzh("Tufte Suite: ") === "Tufte Suite: "
+            ? "Tufte Suite: " +
+              dupes.join(", ") +
+              (dupes.length > 1 ? " are" : " is") +
+              " also enabled standalone. Disable the standalone version" +
+              (dupes.length > 1 ? "s" : "") +
+              " to avoid double rendering."
+            : tzh("Tufte Suite: ") +
+              dupes.join("、") +
+              " 同时以独立插件方式启用。请禁用独立版本，以避免重复渲染。",
           10000
         );
       }

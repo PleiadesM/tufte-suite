@@ -1,5 +1,25 @@
 const { MarkdownRenderer, Plugin, TFile } = require("obsidian");
 
+// --- Simplified Chinese UI strings ------------------------------------------
+// Keyed by the exact English literal; tzh() falls back to its input, so the
+// English behaviour is byte-identical by construction. The lookup is lazy
+// (localStorage is read per call) so a language change takes effect without a
+// reload of the module.
+var TUFTE_ZH = {
+  "Insert sidenote at cursor": "在光标处插入旁注",
+  "Insert marginnote after paragraph": "在段落后插入边注",
+  "Insert epigraph after paragraph": "在段落后插入题记",
+  "Toggle margin note": "切换边注",
+  "Sidenote": "旁注"
+};
+function tzh(s) {
+  try {
+    var l = window.localStorage.getItem("language");
+    if (l && String(l).toLowerCase().indexOf("zh") === 0) return TUFTE_ZH[s] || s;
+  } catch (e) {}
+  return s;
+}
+
 // New recommended syntax:
 //   > [!sidenote] 1
 //   > body text
@@ -73,17 +93,17 @@ module.exports = class TufteSidenotesPlugin extends Plugin {
   registerMarginaliaCommands() {
     this.addCommand({
       id: "insert-sidenote",
-      name: "Insert sidenote at cursor",
+      name: tzh("Insert sidenote at cursor"),
       editorCallback: (editor) => insertSidenoteAtCursor(editor)
     });
     this.addCommand({
       id: "insert-marginnote",
-      name: "Insert marginnote after paragraph",
+      name: tzh("Insert marginnote after paragraph"),
       editorCallback: (editor) => insertMarginnoteAtCursor(editor)
     });
     this.addCommand({
       id: "insert-epigraph",
-      name: "Insert epigraph after paragraph",
+      name: tzh("Insert epigraph after paragraph"),
       editorCallback: (editor) => insertEpigraphAtCursor(editor)
     });
   }
@@ -553,7 +573,7 @@ function ensureMarginnoteToggle(callout) {
 
   title.setAttribute("role", "button");
   title.setAttribute("tabindex", "0");
-  title.setAttribute("aria-label", "Toggle margin note");
+  title.setAttribute("aria-label", tzh("Toggle margin note"));
   title.setAttribute(
     "aria-expanded",
     callout.classList.contains(MARGINNOTE_REVEALED_CLASS) ? "true" : "false"
@@ -580,7 +600,7 @@ function labelReadingViewInlineRefsFromBrackets(root) {
     if (link.textContent !== label) {
       link.textContent = label;
     }
-    const aria = `Sidenote ${label}`;
+    const aria = tzh("Sidenote") + " " + label;
     if (link.getAttribute("aria-label") !== aria) {
       link.setAttribute("aria-label", aria);
     }
@@ -754,7 +774,7 @@ function wrapOneStrippedRef(root, ref, sectionSource) {
   const sup = (root.ownerDocument || document).createElement("sup");
   sup.className = "tufte-sidenote-ref";
   sup.textContent = ref.label;
-  sup.setAttribute("aria-label", `Sidenote ${ref.label}`);
+  sup.setAttribute("aria-label", tzh("Sidenote") + " " + ref.label);
   labelNode.parentNode.replaceChild(sup, labelNode);
   return true;
 }
@@ -800,7 +820,7 @@ function wrapLiteralFootnoteRefsAsSup(root) {
       const sup = doc.createElement("sup");
       sup.className = "tufte-sidenote-ref";
       sup.textContent = m[1];
-      sup.setAttribute("aria-label", `Sidenote ${m[1]}`);
+      sup.setAttribute("aria-label", tzh("Sidenote") + " " + m[1]);
       fragment.appendChild(sup);
       lastEnd = m.index + m[0].length;
     }

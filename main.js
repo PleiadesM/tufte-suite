@@ -1,11 +1,11 @@
 /* ============================================================================
- * Tufte Suite 1.1.0 - the four Tufte plugins bundled as one plugin.
+ * Tufte Suite 1.2.0 - the four Tufte plugins bundled as one plugin.
  *
  * GENERATED FILE - built 2026-08-14 by build-tufte-suite.js from:
  *   tufte-backlinks 1.0.1     (embedded verbatim)
- *   tufte-figures 1.7.3       (embedded with ONE patch: quilt store path -> plugins/tufte-suite/quilts)
- *   tufte-inline 1.2.1        (embedded verbatim)
- *   tufte-sidenotes 1.7.0     (embedded verbatim)
+ *   tufte-figures 1.8.0       (embedded with ONE patch: quilt store path -> plugins/tufte-suite/quilts)
+ *   tufte-inline 1.3.0        (embedded verbatim)
+ *   tufte-sidenotes 1.8.0     (embedded verbatim)
  *
  * Module load order mirrors the vault's community-plugins.json order:
  *   backlinks -> figures -> inline -> sidenotes
@@ -581,10 +581,10 @@ defineSubmodule({
   key: "figures",
   id: "tufte-figures",
   name: "Tufte Figures",
-  version: "1.7.3",
+  version: "1.8.0",
   blurb: "Column, full-width and margin figures, captions, quilts, lightbox and references."
 }, function (module, exports, require) {
-/*<<<TUFTE-SUITE:BEGIN tufte-figures/main.js v1.7.3>>>*/
+/*<<<TUFTE-SUITE:BEGIN tufte-figures/main.js v1.8.0>>>*/
 const {
   MarkdownRenderer,
   Plugin,
@@ -593,6 +593,106 @@ const {
   PluginSettingTab,
   Notice
 } = require("obsidian");
+
+// --- Simplified Chinese UI strings ------------------------------------------
+// Keyed by the exact English literal; tzh() falls back to its input, so the
+// English behaviour is byte-identical by construction. The lookup is lazy
+// (localStorage is read per call) so a language change takes effect without a
+// reload of the module.
+var TUFTE_ZH = {
+  // commands
+  "Insert figure": "插入图",
+  "Edit figure at cursor": "编辑光标处的图",
+  "Insert image quilt": "插入图像拼图",
+  "Insert figure reference": "插入图引用",
+  "Renumber all figures": "重新编号所有图",
+  // notices
+  "Renumbered": "已重新编号",
+  "No figures found to renumber": "未找到可重新编号的图",
+  "Tufte Figures: couldn't save the image.": "Tufte Figures：无法保存图片。",
+  "Tufte Figures: enter a figure number.": "Tufte Figures：请输入图编号。",
+  "Tufte Figures: a row holds at most 5 images.": "Tufte Figures：一行最多容纳 5 张图片。",
+  "Tufte Figures: add at least 2 images, or use the Basic tab.": "Tufte Figures：请至少添加 2 张图片，或使用“基础”选项卡。",
+  "Tufte Figures: couldn't read the image.": "Tufte Figures：无法读取图片。",
+  "Tufte Figures: add at least one image to the quilt.": "Tufte Figures：请至少向拼图添加一张图片。",
+  "Tufte Figures: images still loading — try again in a moment.": "Tufte Figures：图片仍在加载 — 请稍候重试。",
+  "Tufte Figures: couldn't render the quilt.": "Tufte Figures：无法渲染拼图。",
+  "Tufte Figures: couldn't generate the quilt.": "Tufte Figures：无法生成拼图。",
+  "Tufte Figures: couldn't load the saved quilt.": "Tufte Figures：无法载入已保存的拼图。",
+  "Tufte Figures: the image link is empty.": "Tufte Figures：图片链接为空。",
+  "Figure reference copied": "已复制图引用",
+  "Couldn't access the clipboard": "无法访问剪贴板",
+  "Quilt updated": "拼图已更新",
+  "Quilt inserted": "拼图已插入",
+  // settings tab
+  "Intercept image drops and pastes": "拦截图片拖放与粘贴",
+  "When on, dragging or pasting an image into the editor opens the figure modal. Turn off to use plain Obsidian embedding and the 'Insert figure' command only.": "开启后，将图片拖入或粘贴到编辑器会打开图的对话框。关闭则仅使用 Obsidian 原生嵌入，并只能通过“插入图”命令。",
+  "Figure label prefix": "图标签前缀",
+  "Prefix shown before the number in margin-figure captions, e.g. 'Fig.' → 'Fig. 1.'": "边栏图注中显示在编号前的前缀，例如 'Fig.' → 'Fig. 1.'",
+  "Image quilt output folder": "图像拼图输出文件夹",
+  "Vault-relative folder where generated image-quilt PNGs are saved (created if missing). Leave blank for the vault root. Default: img/quilt.": "保存生成的图像拼图 PNG 的文件夹（相对于库根目录，不存在时自动创建）。留空则保存到库根目录。默认：img/quilt。",
+  // figure reference modal
+  "Figure number": "图编号",
+  "Detected figures:": "已检测到的图：",
+  "No figure anchors detected in this note yet.": "本笔记中尚未检测到图锚点。",
+  "Reference": "引用",
+  "This will be inserted at the cursor.": "将插入到光标处。",
+  "Insert reference": "插入引用",
+  // figure modal — shell + tabs
+  "Edit Tufte figure": "编辑 Tufte 图",
+  "Insert Tufte figure": "插入 Tufte 图",
+  "Basic": "基础",
+  "Multiple images": "多图",
+  "Image quilt": "图像拼图",
+  // figure modal — basic tab
+  "Image link": "图片链接",
+  "The embed inserted into the figure.": "插入到图中的嵌入代码。",
+  "Display": "显示方式",
+  "Default — image in column, caption in margin": "默认 — 图片在正文栏，图注在边栏",
+  "Full-width — image spans column + margin": "通栏 — 图片横跨正文栏与边栏",
+  "Margin figure — [!figure-margin]": "边栏图 — [!figure-margin]",
+  "Auto-suggested; edit to set it manually.": "自动建议；可编辑以手动指定。",
+  "Alt text": "替代文本",
+  "Caption": "图注",
+  "Size (px)": "尺寸（像素）",
+  "Width × height. Ratio is locked — editing one updates the other. Leave blank for the original size.": "宽 × 高。比例已锁定 — 修改其一会同步另一项。留空则使用原始尺寸。",
+  "width": "宽",
+  "height": "高",
+  "In-text reference": "正文中的引用",
+  "Clickable link to this figure — copy it into your prose.": "指向此图的可点击链接 — 复制到正文中使用。",
+  "Copy": "复制",
+  "Save figure": "保存图",
+  // figure modal — multiple-images tab
+  "A row of up to 5 images sharing one caption. Heights are equalised; each image keeps its ratio.": "一行最多 5 张图片共用一条图注。高度统一，各图保持自身比例。",
+  "Default — row in column, captions in margin": "默认 — 图片行在正文栏，图注在边栏",
+  "Full-width — row spans column + margin": "通栏 — 图片行横跨正文栏与边栏",
+  "Row height (px)": "行高（像素）",
+  "Shared height; per-image widths follow each ratio.": "统一高度；各图宽度按自身比例计算。",
+  "Drag images here, or click to browse": "将图片拖到此处，或点击浏览",
+  "individual caption": "单张图注",
+  "Overall caption": "总图注",
+  // figure modal — image-quilt tab
+  "Combine many images into one quilt — a tight grid of uniform-height tiles. Drag tiles to reorder, ✕ to remove. Generates a single transparent PNG inserted as a figure; re-editable later via 'Edit figure at cursor'.": "将多张图片合成为一张拼图 — 由等高瓦片组成的紧密网格。拖动瓦片可重新排序，✕ 可移除。生成一张透明 PNG 并作为图插入；之后可通过“编辑光标处的图”再次编辑。",
+  "Default — quilt in column, caption in margin": "默认 — 拼图在正文栏，图注在边栏",
+  "Full-width — quilt spans column + margin": "通栏 — 拼图横跨正文栏与边栏",
+  "Tile height (px)": "瓦片高度（像素）",
+  "Shared height of every tile; widths follow each image's ratio.": "所有瓦片的统一高度；宽度按各图比例计算。",
+  "Zoom (%)": "缩放（%）",
+  "Magnify and crop the image inside each tile.": "放大并裁剪每个瓦片内的图片。",
+  "Grayscale": "灰度",
+  "Render the quilt in black and white.": "以黑白方式渲染拼图。",
+  "Loading quilt…": "正在载入拼图…",
+  "No images yet — drop some below to build the quilt.": "尚无图片 — 在下方拖入图片以构建拼图。",
+  "Save quilt": "保存拼图",
+  "Generate & insert quilt": "生成并插入拼图"
+};
+function tzh(s) {
+  try {
+    var l = window.localStorage.getItem("language");
+    if (l && String(l).toLowerCase().indexOf("zh") === 0) return TUFTE_ZH[s] || s;
+  } catch (e) {}
+  return s;
+}
 
 // Tufte Figures — drop-to-insert Tufte-style figures.
 //
@@ -669,7 +769,7 @@ module.exports = class TufteFiguresPlugin extends Plugin {
 
     this.addCommand({
       id: "insert-figure",
-      name: "Insert figure",
+      name: tzh("Insert figure"),
       editorCallback: (editor) => {
         const line = editor.getLine(editor.getCursor().line) || "";
         const m = line.match(/!\[\[[^\]]+\]\]|!\[[^\]]*\]\([^)]+\)/);
@@ -686,7 +786,7 @@ module.exports = class TufteFiguresPlugin extends Plugin {
     // save. Bind a hotkey in Settings → Hotkeys.
     this.addCommand({
       id: "edit-figure",
-      name: "Edit figure at cursor",
+      name: tzh("Edit figure at cursor"),
       editorCheckCallback: (checking, editor) => {
         const found = findFigureAtCursor(editor);
         if (!found) return false;
@@ -722,7 +822,7 @@ module.exports = class TufteFiguresPlugin extends Plugin {
 
     this.addCommand({
       id: "insert-image-quilt",
-      name: "Insert image quilt",
+      name: tzh("Insert image quilt"),
       editorCallback: (editor) => {
         new FigureModal(this.app, this, editor, {
           embed: "",
@@ -736,7 +836,7 @@ module.exports = class TufteFiguresPlugin extends Plugin {
 
     this.addCommand({
       id: "insert-figure-reference",
-      name: "Insert figure reference",
+      name: tzh("Insert figure reference"),
       editorCallback: (editor) => {
         new FigureReferenceModal(this.app, this, editor).open();
       }
@@ -744,13 +844,15 @@ module.exports = class TufteFiguresPlugin extends Plugin {
 
     this.addCommand({
       id: "renumber-figures",
-      name: "Renumber all figures",
+      name: tzh("Renumber all figures"),
       editorCallback: (editor) => {
         const count = renumberAllFigures(editor);
         new Notice(
           count
-            ? `Renumbered ${count} figure${count === 1 ? "" : "s"}`
-            : "No figures found to renumber"
+            ? tzh("Renumbered") === "Renumbered"
+              ? `Renumbered ${count} figure${count === 1 ? "" : "s"}`
+              : `${tzh("Renumbered")} ${count} 个图`
+            : tzh("No figures found to renumber")
         );
       }
     });
@@ -1073,7 +1175,7 @@ module.exports = class TufteFiguresPlugin extends Plugin {
       embed = this.buildEmbed(tfile, sourcePath);
     } catch (e) {
       console.error("tufte-figures: failed to save dropped image", e);
-      new Notice("Tufte Figures: couldn't save the image.");
+      new Notice(tzh("Tufte Figures: couldn't save the image."));
       return;
     }
 
@@ -2631,14 +2733,14 @@ class FigureReferenceModal extends Modal {
     const known = figureAnchorNumbers(this.editor.getValue());
     contentEl.empty();
     contentEl.addClass("tufte-figure-modal");
-    contentEl.createEl("h3", { text: "Insert figure reference" });
+    contentEl.createEl("h3", { text: tzh("Insert figure reference") });
 
     new Setting(contentEl)
-      .setName("Figure number")
+      .setName(tzh("Figure number"))
       .setDesc(
         known.length
-          ? `Detected figures: ${known.join(", ")}.`
-          : "No figure anchors detected in this note yet."
+          ? `${tzh("Detected figures:")} ${known.join(", ")}.`
+          : tzh("No figure anchors detected in this note yet.")
       )
       .addText((t) => {
         t.setValue(this.number).onChange((v) => {
@@ -2658,8 +2760,8 @@ class FigureReferenceModal extends Modal {
       });
 
     new Setting(contentEl)
-      .setName("Reference")
-      .setDesc("This will be inserted at the cursor.")
+      .setName(tzh("Reference"))
+      .setDesc(tzh("This will be inserted at the cursor."))
       .addText((t) => {
         this.referenceInput = t;
         t.setValue(this.referenceText());
@@ -2668,7 +2770,7 @@ class FigureReferenceModal extends Modal {
 
     new Setting(contentEl).addButton((b) =>
       b
-        .setButtonText("Insert reference")
+        .setButtonText(tzh("Insert reference"))
         .setCta()
         .onClick(() => this.doInsert())
     );
@@ -2685,7 +2787,7 @@ class FigureReferenceModal extends Modal {
   doInsert() {
     const number = (this.number || "").trim();
     if (!/^\d+$/.test(number)) {
-      new Notice("Tufte Figures: enter a figure number.");
+      new Notice(tzh("Tufte Figures: enter a figure number."));
       return;
     }
     insertInlineText(this.editor, figureReferenceText(number));
@@ -2812,13 +2914,13 @@ class FigureModal extends Modal {
     contentEl.empty();
     contentEl.addClass("tufte-figure-modal");
     contentEl.createEl("h3", {
-      text: this.isEdit ? "Edit Tufte figure" : "Insert Tufte figure"
+      text: this.isEdit ? tzh("Edit Tufte figure") : tzh("Insert Tufte figure")
     });
 
     const tabs = contentEl.createDiv({ cls: "tufte-fig-tabs" });
-    const basicBtn = tabs.createEl("button", { text: "Basic" });
-    const multiBtn = tabs.createEl("button", { text: "Multiple images" });
-    const quiltBtn = tabs.createEl("button", { text: "Image quilt" });
+    const basicBtn = tabs.createEl("button", { text: tzh("Basic") });
+    const multiBtn = tabs.createEl("button", { text: tzh("Multiple images") });
+    const quiltBtn = tabs.createEl("button", { text: tzh("Image quilt") });
     const basicEl = contentEl.createDiv({ cls: "tufte-fig-tab-panel" });
     const multiEl = contentEl.createDiv({ cls: "tufte-fig-tab-panel" });
     const quiltEl = contentEl.createDiv({ cls: "tufte-fig-tab-panel" });
@@ -2849,8 +2951,8 @@ class FigureModal extends Modal {
 
   buildBasicTab(contentEl) {
     new Setting(contentEl)
-      .setName("Image link")
-      .setDesc("The embed inserted into the figure.")
+      .setName(tzh("Image link"))
+      .setDesc(tzh("The embed inserted into the figure."))
       .addText((t) =>
         t.setValue(this.embed).onChange((v) => {
           this.embed = v;
@@ -2858,18 +2960,18 @@ class FigureModal extends Modal {
         })
       );
 
-    new Setting(contentEl).setName("Display").addDropdown((d) => {
-      d.addOption("default", "Default — image in column, caption in margin");
-      d.addOption("full", "Full-width — image spans column + margin");
-      d.addOption("margin", "Margin figure — [!figure-margin]");
+    new Setting(contentEl).setName(tzh("Display")).addDropdown((d) => {
+      d.addOption("default", tzh("Default — image in column, caption in margin"));
+      d.addOption("full", tzh("Full-width — image spans column + margin"));
+      d.addOption("margin", tzh("Margin figure — [!figure-margin]"));
       d.setValue(this.mode).onChange((v) => {
         this.mode = v;
       });
     });
 
     new Setting(contentEl)
-      .setName("Figure number")
-      .setDesc("Auto-suggested; edit to set it manually.")
+      .setName(tzh("Figure number"))
+      .setDesc(tzh("Auto-suggested; edit to set it manually."))
       .addText((t) =>
         t.setValue(this.number).onChange((v) => {
           this.number = v.trim();
@@ -2878,14 +2980,14 @@ class FigureModal extends Modal {
       );
 
     new Setting(contentEl)
-      .setName("Alt text")
+      .setName(tzh("Alt text"))
       .addText((t) =>
         t.setValue(this.alt).onChange((v) => {
           this.alt = v;
         })
       );
 
-    new Setting(contentEl).setName("Caption").addTextArea((t) => {
+    new Setting(contentEl).setName(tzh("Caption")).addTextArea((t) => {
       t.setValue(this.caption).onChange((v) => {
         this.caption = v;
       });
@@ -2894,11 +2996,11 @@ class FigureModal extends Modal {
     });
 
     new Setting(contentEl)
-      .setName("Size (px)")
-      .setDesc("Width × height. Ratio is locked — editing one updates the other. Leave blank for the original size.")
+      .setName(tzh("Size (px)"))
+      .setDesc(tzh("Width × height. Ratio is locked — editing one updates the other. Leave blank for the original size."))
       .addText((t) => {
         this.widthInput = t;
-        t.setPlaceholder("width");
+        t.setPlaceholder(tzh("width"));
         t.setValue(this.width);
         t.inputEl.type = "number";
         t.inputEl.min = "1";
@@ -2907,7 +3009,7 @@ class FigureModal extends Modal {
       })
       .addText((t) => {
         this.heightInput = t;
-        t.setPlaceholder("height");
+        t.setPlaceholder(tzh("height"));
         t.setValue(this.height);
         t.inputEl.type = "number";
         t.inputEl.min = "1";
@@ -2916,27 +3018,27 @@ class FigureModal extends Modal {
       });
 
     const indicator = new Setting(contentEl)
-      .setName("In-text reference")
-      .setDesc("Clickable link to this figure — copy it into your prose.");
+      .setName(tzh("In-text reference"))
+      .setDesc(tzh("Clickable link to this figure — copy it into your prose."));
     indicator.addText((t) => {
       this.indicatorInput = t;
       t.setValue(this.indicatorText());
       t.inputEl.readOnly = true;
     });
     indicator.addButton((b) =>
-      b.setButtonText("Copy").onClick(async () => {
+      b.setButtonText(tzh("Copy")).onClick(async () => {
         try {
           await navigator.clipboard.writeText(this.indicatorText());
-          new Notice("Figure reference copied");
+          new Notice(tzh("Figure reference copied"));
         } catch {
-          new Notice("Couldn't access the clipboard");
+          new Notice(tzh("Couldn't access the clipboard"));
         }
       })
     );
 
     new Setting(contentEl).addButton((b) =>
       b
-        .setButtonText(this.isEdit ? "Save figure" : "Insert figure")
+        .setButtonText(this.isEdit ? tzh("Save figure") : tzh("Insert figure"))
         .setCta()
         .onClick(() => this.doInsert())
     );
@@ -2945,12 +3047,12 @@ class FigureModal extends Modal {
   buildMultiTab(contentEl) {
     contentEl.createEl("p", {
       cls: "tufte-fig-multi-hint",
-      text: "A row of up to 5 images sharing one caption. Heights are equalised; each image keeps its ratio."
+      text: tzh("A row of up to 5 images sharing one caption. Heights are equalised; each image keeps its ratio.")
     });
 
-    new Setting(contentEl).setName("Display").addDropdown((d) => {
-      d.addOption("default", "Default — row in column, captions in margin");
-      d.addOption("full", "Full-width — row spans column + margin");
+    new Setting(contentEl).setName(tzh("Display")).addDropdown((d) => {
+      d.addOption("default", tzh("Default — row in column, captions in margin"));
+      d.addOption("full", tzh("Full-width — row spans column + margin"));
       // No margin mode: a row of images doesn't lay out well in the margin.
       d.setValue(this.mode === "margin" ? "default" : this.mode).onChange((v) => {
         this.mode = v;
@@ -2958,7 +3060,7 @@ class FigureModal extends Modal {
     });
 
     new Setting(contentEl)
-      .setName("Figure number")
+      .setName(tzh("Figure number"))
       .addText((t) =>
         t.setValue(this.number).onChange((v) => {
           this.number = v.trim();
@@ -2966,8 +3068,8 @@ class FigureModal extends Modal {
       );
 
     new Setting(contentEl)
-      .setName("Row height (px)")
-      .setDesc("Shared height; per-image widths follow each ratio.")
+      .setName(tzh("Row height (px)"))
+      .setDesc(tzh("Shared height; per-image widths follow each ratio."))
       .addText((t) => {
         t.setValue(String(this.rowHeight));
         t.inputEl.type = "number";
@@ -2990,7 +3092,7 @@ class FigureModal extends Modal {
     zone.createSpan({ cls: "tufte-fig-dropzone-plus", text: "+" });
     zone.createSpan({
       cls: "tufte-fig-dropzone-text",
-      text: "Drag images here, or click to browse"
+      text: tzh("Drag images here, or click to browse")
     });
     zone.addEventListener("click", () => this.pickImage());
     zone.addEventListener("dragover", (e) => {
@@ -3000,7 +3102,7 @@ class FigureModal extends Modal {
     zone.addEventListener("dragleave", () => zone.removeClass("is-dragover"));
     zone.addEventListener("drop", (e) => this.onZoneDrop(e, zone));
 
-    new Setting(contentEl).setName("Overall caption").addTextArea((t) => {
+    new Setting(contentEl).setName(tzh("Overall caption")).addTextArea((t) => {
       t.setValue(this.overallCaption).onChange((v) => {
         this.overallCaption = v;
       });
@@ -3010,7 +3112,7 @@ class FigureModal extends Modal {
 
     new Setting(contentEl).addButton((b) =>
       b
-        .setButtonText(this.isEdit ? "Save figure" : "Insert figure")
+        .setButtonText(this.isEdit ? tzh("Save figure") : tzh("Insert figure"))
         .setCta()
         .onClick(() => this.doInsertMulti())
     );
@@ -3040,7 +3142,7 @@ class FigureModal extends Modal {
 
       const cap = row.createEl("input", { type: "text" });
       cap.value = entry.caption;
-      cap.placeholder = "individual caption";
+      cap.placeholder = tzh("individual caption");
       cap.addClass("tufte-fig-entry-caption");
       cap.oninput = () => {
         entry.caption = cap.value;
@@ -3056,7 +3158,7 @@ class FigureModal extends Modal {
 
   pickImage() {
     if (this.entries.length >= 5) {
-      new Notice("Tufte Figures: a row holds at most 5 images.");
+      new Notice(tzh("Tufte Figures: a row holds at most 5 images."));
       return;
     }
     const input = document.createElement("input");
@@ -3085,7 +3187,7 @@ class FigureModal extends Modal {
       this.addEntryFromTFile(tfile);
     } catch (e) {
       console.error("tufte-figures: failed to save image", e);
-      new Notice("Tufte Figures: couldn't save the image.");
+      new Notice(tzh("Tufte Figures: couldn't save the image."));
     }
   }
 
@@ -3181,7 +3283,7 @@ class FigureModal extends Modal {
 
   doInsertMulti() {
     if (this.entries.length < 2) {
-      new Notice("Tufte Figures: add at least 2 images, or use the Basic tab.");
+      new Notice(tzh("Tufte Figures: add at least 2 images, or use the Basic tab."));
       return;
     }
     // Fill in any missing widths without clobbering ones already set (changing
@@ -3211,15 +3313,16 @@ class FigureModal extends Modal {
   buildQuiltTab(contentEl) {
     contentEl.createEl("p", {
       cls: "tufte-fig-multi-hint",
-      text:
+      text: tzh(
         "Combine many images into one quilt — a tight grid of uniform-height tiles. " +
-        "Drag tiles to reorder, ✕ to remove. Generates a single transparent PNG inserted " +
-        "as a figure; re-editable later via 'Edit figure at cursor'."
+          "Drag tiles to reorder, ✕ to remove. Generates a single transparent PNG inserted " +
+          "as a figure; re-editable later via 'Edit figure at cursor'."
+      )
     });
 
-    new Setting(contentEl).setName("Display").addDropdown((d) => {
-      d.addOption("default", "Default — quilt in column, caption in margin");
-      d.addOption("full", "Full-width — quilt spans column + margin");
+    new Setting(contentEl).setName(tzh("Display")).addDropdown((d) => {
+      d.addOption("default", tzh("Default — quilt in column, caption in margin"));
+      d.addOption("full", tzh("Full-width — quilt spans column + margin"));
       // No margin mode: a wide quilt doesn't lay out well in the margin.
       d.setValue(this.mode === "margin" ? "default" : this.mode).onChange((v) => {
         this.mode = v;
@@ -3227,7 +3330,7 @@ class FigureModal extends Modal {
     });
 
     new Setting(contentEl)
-      .setName("Figure number")
+      .setName(tzh("Figure number"))
       .addText((t) =>
         t.setValue(this.number).onChange((v) => {
           this.number = v.trim();
@@ -3235,8 +3338,8 @@ class FigureModal extends Modal {
       );
 
     new Setting(contentEl)
-      .setName("Tile height (px)")
-      .setDesc("Shared height of every tile; widths follow each image's ratio.")
+      .setName(tzh("Tile height (px)"))
+      .setDesc(tzh("Shared height of every tile; widths follow each image's ratio."))
       .addSlider((s) => {
         this._quiltRowSlider = s;
         s.setLimits(40, 320, 5);
@@ -3249,8 +3352,8 @@ class FigureModal extends Modal {
       });
 
     new Setting(contentEl)
-      .setName("Zoom (%)")
-      .setDesc("Magnify and crop the image inside each tile.")
+      .setName(tzh("Zoom (%)"))
+      .setDesc(tzh("Magnify and crop the image inside each tile."))
       .addSlider((s) => {
         this._quiltZoomSlider = s;
         s.setLimits(100, 300, 5);
@@ -3263,8 +3366,8 @@ class FigureModal extends Modal {
       });
 
     new Setting(contentEl)
-      .setName("Grayscale")
-      .setDesc("Render the quilt in black and white.")
+      .setName(tzh("Grayscale"))
+      .setDesc(tzh("Render the quilt in black and white."))
       .addToggle((t) => {
         this._quiltGrayToggle = t;
         t.setValue(this.quilt.grayscale).onChange((v) => {
@@ -3279,7 +3382,7 @@ class FigureModal extends Modal {
     zone.createSpan({ cls: "tufte-fig-dropzone-plus", text: "+" });
     zone.createSpan({
       cls: "tufte-fig-dropzone-text",
-      text: "Drag images here, or click to browse"
+      text: tzh("Drag images here, or click to browse")
     });
     zone.addEventListener("click", () => this.pickQuiltImages());
     zone.addEventListener("dragover", (e) => {
@@ -3289,7 +3392,7 @@ class FigureModal extends Modal {
     zone.addEventListener("dragleave", () => zone.removeClass("is-dragover"));
     zone.addEventListener("drop", (e) => this.onQuiltZoneDrop(e, zone));
 
-    new Setting(contentEl).setName("Caption").addTextArea((t) => {
+    new Setting(contentEl).setName(tzh("Caption")).addTextArea((t) => {
       t.setValue(this.caption).onChange((v) => {
         this.caption = v;
       });
@@ -3299,7 +3402,7 @@ class FigureModal extends Modal {
 
     new Setting(contentEl).addButton((b) =>
       b
-        .setButtonText(this.isEdit ? "Save quilt" : "Generate & insert quilt")
+        .setButtonText(this.isEdit ? tzh("Save quilt") : tzh("Generate & insert quilt"))
         .setCta()
         .onClick(() => this.doInsertQuilt())
     );
@@ -3358,7 +3461,7 @@ class FigureModal extends Modal {
       await this.addQuiltTile(new Uint8Array(buffer), ext, file.name || `image.${ext}`);
     } catch (e) {
       console.error("tufte-figures: failed to read quilt image", e);
-      new Notice("Tufte Figures: couldn't read the image.");
+      new Notice(tzh("Tufte Figures: couldn't read the image."));
     }
   }
 
@@ -3406,13 +3509,13 @@ class FigureModal extends Modal {
     stage.empty();
 
     if (this.quilt.loading) {
-      stage.createDiv({ cls: "tufte-quilt-empty", text: "Loading quilt…" });
+      stage.createDiv({ cls: "tufte-quilt-empty", text: tzh("Loading quilt…") });
       return;
     }
     if (!this.quilt.tiles.length) {
       stage.createDiv({
         cls: "tufte-quilt-empty",
-        text: "No images yet — drop some below to build the quilt."
+        text: tzh("No images yet — drop some below to build the quilt.")
       });
       return;
     }
@@ -3523,11 +3626,11 @@ class FigureModal extends Modal {
 
   async doInsertQuilt() {
     if (!this.quilt.tiles.length) {
-      new Notice("Tufte Figures: add at least one image to the quilt.");
+      new Notice(tzh("Tufte Figures: add at least one image to the quilt."));
       return;
     }
     if (this.quilt.tiles.some((t) => !t.imgEl)) {
-      new Notice("Tufte Figures: images still loading — try again in a moment.");
+      new Notice(tzh("Tufte Figures: images still loading — try again in a moment."));
       return;
     }
     try {
@@ -3548,7 +3651,7 @@ class FigureModal extends Modal {
       // Render the quilt PNG.
       const blob = await this.renderQuiltCanvas();
       if (!blob) {
-        new Notice("Tufte Figures: couldn't render the quilt.");
+        new Notice(tzh("Tufte Figures: couldn't render the quilt."));
         return;
       }
       const pngBuf = await blob.arrayBuffer();
@@ -3600,11 +3703,11 @@ class FigureModal extends Modal {
         labelPrefix: this.plugin.settings.labelPrefix
       });
       this.commitBlock(block);
-      new Notice(this.isEdit ? "Quilt updated" : "Quilt inserted");
+      new Notice(this.isEdit ? tzh("Quilt updated") : tzh("Quilt inserted"));
       this.close();
     } catch (e) {
       console.error("tufte-figures: failed to generate quilt", e);
-      new Notice("Tufte Figures: couldn't generate the quilt.");
+      new Notice(tzh("Tufte Figures: couldn't generate the quilt."));
     }
   }
 
@@ -3663,7 +3766,7 @@ class FigureModal extends Modal {
       this.quilt.tiles = tiles;
     } catch (e) {
       console.error("tufte-figures: failed to load quilt config", e);
-      new Notice("Tufte Figures: couldn't load the saved quilt.");
+      new Notice(tzh("Tufte Figures: couldn't load the saved quilt."));
     } finally {
       this.quilt.loading = false;
       // Sync widgets that were built before the async config arrived.
@@ -3756,7 +3859,7 @@ class FigureModal extends Modal {
 
   doInsert() {
     if (!this.embed || !this.embed.trim()) {
-      new Notice("Tufte Figures: the image link is empty.");
+      new Notice(tzh("Tufte Figures: the image link is empty."));
       return;
     }
     // Ratio locked → encode width only (height stays auto, preserving the
@@ -3813,9 +3916,11 @@ class FigureSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName("Intercept image drops and pastes")
+      .setName(tzh("Intercept image drops and pastes"))
       .setDesc(
-        "When on, dragging or pasting an image into the editor opens the figure modal. Turn off to use plain Obsidian embedding and the 'Insert figure' command only."
+        tzh(
+          "When on, dragging or pasting an image into the editor opens the figure modal. Turn off to use plain Obsidian embedding and the 'Insert figure' command only."
+        )
       )
       .addToggle((t) =>
         t.setValue(this.plugin.settings.interceptDrops).onChange(async (v) => {
@@ -3825,9 +3930,11 @@ class FigureSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Figure label prefix")
+      .setName(tzh("Figure label prefix"))
       .setDesc(
-        "Prefix shown before the number in margin-figure captions, e.g. 'Fig.' → 'Fig. 1.'"
+        tzh(
+          "Prefix shown before the number in margin-figure captions, e.g. 'Fig.' → 'Fig. 1.'"
+        )
       )
       .addText((t) =>
         t.setValue(this.plugin.settings.labelPrefix).onChange(async (v) => {
@@ -3837,9 +3944,11 @@ class FigureSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Image quilt output folder")
+      .setName(tzh("Image quilt output folder"))
       .setDesc(
-        "Vault-relative folder where generated image-quilt PNGs are saved (created if missing). Leave blank for the vault root. Default: img/quilt."
+        tzh(
+          "Vault-relative folder where generated image-quilt PNGs are saved (created if missing). Leave blank for the vault root. Default: img/quilt."
+        )
       )
       .addText((t) =>
         t
@@ -3859,14 +3968,32 @@ defineSubmodule({
   key: "inline",
   id: "tufte-inline",
   name: "Tufte Inline",
-  version: "1.2.1",
+  version: "1.3.0",
   blurb: "Inline shorthands: ^^new thought^^, &&lead-in&&, @@CJK drop cap@@."
 }, function (module, exports, require) {
-/*<<<TUFTE-SUITE:BEGIN tufte-inline/main.js v1.2.1>>>*/
+/*<<<TUFTE-SUITE:BEGIN tufte-inline/main.js v1.3.0>>>*/
 const { Plugin, editorLivePreviewField } = require("obsidian");
 const { ViewPlugin, Decoration, WidgetType } = require("@codemirror/view");
 const { RangeSetBuilder } = require("@codemirror/state");
 const { syntaxTree } = require("@codemirror/language");
+
+// --- Simplified Chinese UI strings ------------------------------------------
+// Keyed by the exact English literal; tzh() falls back to its input, so the
+// English behaviour is byte-identical by construction. The lookup is lazy
+// (localStorage is read per call) so a language change takes effect without a
+// reload of the module.
+var TUFTE_ZH = {
+  "Wrap selection in New Thought (^^…^^)": "将选区包裹为新思路（^^…^^）",
+  "Wrap selection in lead-in (&&…&&)": "将选区包裹为引导词（&&…&&）",
+  "Wrap first character in CJK drop cap (@@…@@)": "将首字包裹为中文首字下沉（@@…@@）"
+};
+function tzh(s) {
+  try {
+    var l = window.localStorage.getItem("language");
+    if (l && String(l).toLowerCase().indexOf("zh") === 0) return TUFTE_ZH[s] || s;
+  } catch (e) {}
+  return s;
+}
 
 /* ============================================================================
    Tufte Inline — inline typography shorthands for the Tufte vault.
@@ -3943,17 +4070,17 @@ module.exports = class TufteInlinePlugin extends Plugin {
     // --- Optional convenience commands (no default hotkeys) ----------------
     this.addCommand({
       id: "wrap-newthought",
-      name: "Wrap selection in New Thought (^^…^^)",
+      name: tzh("Wrap selection in New Thought (^^…^^)"),
       editorCallback: (editor) => wrapSelection(editor, "^^"),
     });
     this.addCommand({
       id: "wrap-leadin",
-      name: "Wrap selection in lead-in (&&…&&)",
+      name: tzh("Wrap selection in lead-in (&&…&&)"),
       editorCallback: (editor) => wrapSelection(editor, "&&"),
     });
     this.addCommand({
       id: "wrap-dropcap",
-      name: "Wrap first character in CJK drop cap (@@…@@)",
+      name: tzh("Wrap first character in CJK drop cap (@@…@@)"),
       editorCallback: (editor) => wrapDropcap(editor),
     });
   }
@@ -4158,11 +4285,31 @@ defineSubmodule({
   key: "sidenotes",
   id: "tufte-sidenotes",
   name: "Tufte Sidenotes",
-  version: "1.7.0",
+  version: "1.8.0",
   blurb: "Sidenotes and marginnotes in Reading view."
 }, function (module, exports, require) {
-/*<<<TUFTE-SUITE:BEGIN tufte-sidenotes/main.js v1.7.0>>>*/
+/*<<<TUFTE-SUITE:BEGIN tufte-sidenotes/main.js v1.8.0>>>*/
 const { MarkdownRenderer, Plugin, TFile } = require("obsidian");
+
+// --- Simplified Chinese UI strings ------------------------------------------
+// Keyed by the exact English literal; tzh() falls back to its input, so the
+// English behaviour is byte-identical by construction. The lookup is lazy
+// (localStorage is read per call) so a language change takes effect without a
+// reload of the module.
+var TUFTE_ZH = {
+  "Insert sidenote at cursor": "在光标处插入旁注",
+  "Insert marginnote after paragraph": "在段落后插入边注",
+  "Insert epigraph after paragraph": "在段落后插入题记",
+  "Toggle margin note": "切换边注",
+  "Sidenote": "旁注"
+};
+function tzh(s) {
+  try {
+    var l = window.localStorage.getItem("language");
+    if (l && String(l).toLowerCase().indexOf("zh") === 0) return TUFTE_ZH[s] || s;
+  } catch (e) {}
+  return s;
+}
 
 // New recommended syntax:
 //   > [!sidenote] 1
@@ -4237,17 +4384,17 @@ module.exports = class TufteSidenotesPlugin extends Plugin {
   registerMarginaliaCommands() {
     this.addCommand({
       id: "insert-sidenote",
-      name: "Insert sidenote at cursor",
+      name: tzh("Insert sidenote at cursor"),
       editorCallback: (editor) => insertSidenoteAtCursor(editor)
     });
     this.addCommand({
       id: "insert-marginnote",
-      name: "Insert marginnote after paragraph",
+      name: tzh("Insert marginnote after paragraph"),
       editorCallback: (editor) => insertMarginnoteAtCursor(editor)
     });
     this.addCommand({
       id: "insert-epigraph",
-      name: "Insert epigraph after paragraph",
+      name: tzh("Insert epigraph after paragraph"),
       editorCallback: (editor) => insertEpigraphAtCursor(editor)
     });
   }
@@ -4717,7 +4864,7 @@ function ensureMarginnoteToggle(callout) {
 
   title.setAttribute("role", "button");
   title.setAttribute("tabindex", "0");
-  title.setAttribute("aria-label", "Toggle margin note");
+  title.setAttribute("aria-label", tzh("Toggle margin note"));
   title.setAttribute(
     "aria-expanded",
     callout.classList.contains(MARGINNOTE_REVEALED_CLASS) ? "true" : "false"
@@ -4744,7 +4891,7 @@ function labelReadingViewInlineRefsFromBrackets(root) {
     if (link.textContent !== label) {
       link.textContent = label;
     }
-    const aria = `Sidenote ${label}`;
+    const aria = tzh("Sidenote") + " " + label;
     if (link.getAttribute("aria-label") !== aria) {
       link.setAttribute("aria-label", aria);
     }
@@ -4918,7 +5065,7 @@ function wrapOneStrippedRef(root, ref, sectionSource) {
   const sup = (root.ownerDocument || document).createElement("sup");
   sup.className = "tufte-sidenote-ref";
   sup.textContent = ref.label;
-  sup.setAttribute("aria-label", `Sidenote ${ref.label}`);
+  sup.setAttribute("aria-label", tzh("Sidenote") + " " + ref.label);
   labelNode.parentNode.replaceChild(sup, labelNode);
   return true;
 }
@@ -4964,7 +5111,7 @@ function wrapLiteralFootnoteRefsAsSup(root) {
       const sup = doc.createElement("sup");
       sup.className = "tufte-sidenote-ref";
       sup.textContent = m[1];
-      sup.setAttribute("aria-label", `Sidenote ${m[1]}`);
+      sup.setAttribute("aria-label", tzh("Sidenote") + " " + m[1]);
       fragment.appendChild(sup);
       lastEnd = m.index + m[0].length;
     }
@@ -5315,6 +5462,94 @@ function nextNumericFootnoteLabel(source) {
 const MODULES_KEY = "__modules";
 const TYPEFACES_KEY = "__typefaces";
 
+/* ── Simplified Chinese UI strings ───────────────────────────────────────
+ * Keyed by the exact English literal; tzh() falls back to its input, so the
+ * English behaviour is byte-identical by construction. The lookup is lazy
+ * (localStorage is read per call) so a language change takes effect on the
+ * next re-render without reloading the plugin. Module display names
+ * ("Tufte Figures", …) are product names and stay English. */
+const TUFTE_ZH = {
+  "Tufte Suite: ": "Tufte Suite：",
+  "Bundled plugins": "捆绑的插件",
+  "Tufte Suite bundles the four standalone Tufte plugins as switchable modules. Keep the standalone plugins disabled while Tufte Suite is enabled, or everything renders twice. Toggling a module applies immediately.": "Tufte Suite 将四个独立的 Tufte 插件捆绑为可开关的模块。启用 Tufte Suite 时请保持这些独立插件处于禁用状态，否则所有内容会渲染两次。切换模块会立即生效。",
+  "Backlink and mention snippets rendered as formatted Markdown.": "以带格式的 Markdown 渲染反向链接与提及片段。",
+  "Column, full-width and margin figures, captions, quilts, lightbox and references.": "正文栏图、通栏图与边栏图，图注、图像拼图、灯箱与引用。",
+  "Inline shorthands: ^^new thought^^, &&lead-in&&, @@CJK drop cap@@.": "行内简写：^^新思路^^、&&引导词&&、@@中文首字下沉@@。",
+  "Sidenotes and marginnotes in Reading view.": "阅读视图中的旁注与边注。",
+  'Tufte Suite: module "': "Tufte Suite：模块 “",
+  '" failed to load - see developer console.': "” 加载失败 — 请查看开发者控制台。",
+  "Typefaces (Tufte theme)": "字体（Tufte 主题）",
+  "Faces and weights for the Tufte theme's two type series — the serif reading register and the sans data/interface register. Changes apply immediately and persist with the Suite's settings; 'Theme default' hands a knob back to the theme. Chinese companion faces follow automatically. Requires the Tufte theme (inert under any other theme).": "Tufte 主题两套字体系列的字体与字重 — 衬线阅读语境与无衬线数据／界面语境。修改会立即生效并随 Suite 设置一同保存；选择“主题默认”即把该项交还给主题。中文伴随字体会自动跟随。需要 Tufte 主题（在其他主题下无效）。",
+  "Latin · 西文": "西文",
+  "Chinese · 中文": "中文",
+  // typeface knob names
+  "Serif — reading face": "衬线 — 正文阅读字体",
+  "Serif — reading weight": "衬线 — 正文字重",
+  "Sans — data & interface face": "无衬线 — 数据与界面字体",
+  "Sans — data & interface weight": "无衬线 — 数据与界面字重",
+  "Chinese — serif companion (宋体)": "中文衬线（宋体）",
+  "Chinese serif — weight (宋体字重)": "中文衬线字重（宋体）",
+  "Chinese — sans companion (黑体)": "中文无衬线（黑体）",
+  "Chinese sans — weight (黑体字重)": "中文无衬线字重（黑体）",
+  // typeface knob descriptions
+  "Body text, headings, tables, captions. The theme default, et-book (bundled with the theme), is the digital Bembo of Tufte's own books; the alternatives are Monotype book faces in the same tradition, and every one of them falls back to et-book when not installed.": "正文、标题、表格、图注。主题默认的 et-book（随主题内置）是 Tufte 本人著作所用 Bembo 的数字版；备选项均为同一传统下的 Monotype 书籍字体，未安装时都会回退到 et-book。",
+  "The weight body text is set at; bold always sits one step (+200) above it. Faces snap to their nearest real cut — et-book ships Regular and Bold only, so 600 already reads as Bold.": "正文所用的字重；粗体始终比它高一档（+200）。字体会吸附到最接近的实际刻版 — et-book 只提供常规与粗体，因此 600 已呈现为粗体。",
+  "Task lists, tags, backlinks, Bases, table titles, and the application interface. Gill Sans is the sans of Beautiful Evidence. Cabin — the Johnston–Gill school, bundled inside the theme as a variable font with true 400–700 weights — renders on every machine; the other recommendations are system faces.": "任务列表、标签、反向链接、Bases、表格标题以及应用界面。Gill Sans 是《美丽的证据》所用的无衬线体。Cabin — Johnston–Gill 一脉，作为可变字体内置于主题中，具备真实的 400–700 字重 — 在任何机器上都能显示；其余推荐项为系统字体。",
+  "One weight for the whole sans series, this window included; the H5 table title keeps its own +200 step above it. macOS Gill Sans ships 300/400/600/700/800; requests between cuts snap to the nearest one.": "整个无衬线系列（包括本窗口）统一使用的字重；H5 表格标题仍保持其 +200 的加粗档位。macOS 的 Gill Sans 提供 300/400/600/700/800；介于刻版之间的请求会吸附到最接近的一档。",
+  "The Chinese face behind the Latin serif: body text, headings, tables. The default is the system Song chain (Songti SC / SimSun); Source Han Serif 思源宋体 is the open pan-CJK alternative. The serif reading weight reaches it too. Italic contexts keep Kaiti 楷体 by design.": "西文衬线体背后的中文字体：正文、标题、表格。默认使用系统宋体链（Songti SC / SimSun）；思源宋体 Source Han Serif 是开源的泛中日韩备选项。衬线正文字重同样作用于它。斜体语境按设计固定使用楷体。",
+  "A FIXED weight for Chinese serif text, independent of the Latin knobs: the Suite maps every run weight onto the cut you choose (bold Chinese keeps a +200 step), via named cuts — Songti ships Light/Regular/Bold/Black, 思源宋体 the full range; requests between cuts take the nearest named one. The default keeps today's behavior: Chinese follows the Latin weights.": "中文衬线文字的固定字重，独立于西文的字重旋钮：Suite 会把每一段文字的运行字重映射到你选择的刻版上（中文粗体保持 +200 的档位差），通过具名刻版实现 — 宋体提供 Light/Regular/Bold/Black，思源宋体提供全字重；介于刻版之间的请求取最接近的具名刻版。默认保持当前行为：中文跟随西文字重。",
+  "The Chinese face behind the sans/data register: task lists, tags, Bases, the interface. The default is the system Hei chain (PingFang SC / Microsoft YaHei); Source Han Sans 思源黑体 is the open pan-CJK alternative. The sans weight reaches it too.": "无衬线／数据语境背后的中文字体：任务列表、标签、Bases、界面。默认使用系统黑体链（PingFang SC / Microsoft YaHei）；思源黑体 Source Han Sans 是开源的泛中日韩备选项。无衬线字重同样作用于它。",
+  "A FIXED weight for Chinese in the data register, independent of the Latin knobs; bold keeps a +200 step. PingFang ships Ultralight through Semibold, 思源黑体 the full range; requests between cuts take the nearest named one. The default keeps today's behavior: Chinese follows the Latin weights.": "数据语境中文的固定字重，独立于西文的字重旋钮；粗体保持 +200 的档位差。苹方提供 Ultralight 至 Semibold，思源黑体提供全字重；介于刻版之间的请求取最接近的具名刻版。默认保持当前行为：中文跟随西文字重。",
+  // "Other…" companion rows
+  "Serif — your own font": "衬线 — 自定义字体",
+  "Sans — your own font": "无衬线 — 自定义字体",
+  "Chinese serif — your own font": "中文衬线 — 自定义字体",
+  "Chinese sans — your own font": "中文无衬线 — 自定义字体",
+  // default-label / option rows
+  "Theme default — et-book, Tufte's Bembo": "主题默认 — et-book，Tufte 的 Bembo",
+  "Theme default — 400 · Regular": "主题默认 — 400 · 常规",
+  "Theme default — Gill Sans, Beautiful Evidence": "主题默认 — Gill Sans，《美丽的证据》用字",
+  "Theme default — Songti 宋体 (system chain)": "主题默认 — 宋体（系统字体链）",
+  "Theme default — PingFang 苹方 (system chain)": "主题默认 — 苹方（系统字体链）",
+  "Follow the Latin weights (theme default)": "跟随西文字重（主题默认）",
+  "Other — a font installed on your system…": "其他 — 你系统中已安装的字体…",
+  "Bembo — the printed books' face (Monotype)": "Bembo — 印刷书籍所用的字体（Monotype）",
+  "Plantin (Monotype)": "Plantin（Monotype）",
+  "Perpetua — Eric Gill's serif (Monotype)": "Perpetua — Eric Gill 的衬线体（Monotype）",
+  "Baskerville (Monotype cut)": "Baskerville（Monotype 刻版）",
+  "Cabin — the Johnston–Gill school, bundled (true 400–700)": "Cabin — Johnston–Gill 一脉，随主题内置（真实 400–700 字重）",
+  "Optima — Zapf's humanist (macOS)": "Optima — Zapf 的人文主义无衬线（macOS）",
+  "Seravek (macOS)": "Seravek（macOS）",
+  "Trebuchet MS (everywhere)": "Trebuchet MS（通用）",
+  "Source Han Serif 思源宋体 (open, all weights)": "思源宋体 Source Han Serif（开源，全字重）",
+  "LXGW WenKai 霞鹜文楷 (open, kaiti-flavored)": "霞鹜文楷 LXGW WenKai（开源，楷体风格）",
+  "Source Han Sans 思源黑体 (open, all weights)": "思源黑体 Source Han Sans（开源，全字重）",
+  "100 — Thin": "100 — 极细",
+  "200 — Extra Light": "200 — 特细",
+  "300 — Light": "300 — 细体",
+  "400 — Regular": "400 — 常规",
+  "500 — Medium": "500 — 中等",
+  "600 — Semibold": "600 — 半粗",
+  "700 — Bold": "700 — 粗体",
+  "800 — Extra Bold": "800 — 特粗",
+  "900 — Black": "900 — 浓黑",
+  // font picker
+  "Reading your installed fonts…": "正在读取你已安装的字体…",
+  "Your installed Chinese fonts — the system list filtered to families that can actually set Chinese text. The theme's default chain stays behind the choice as fallback.": "你已安装的中文字体 — 从系统列表中筛选出真正能排布中文的字族。主题的默认字体链仍作为回退保留在所选字体之后。",
+  "Your installed fonts — the same list as Settings → Appearance → Font. The theme's default chain stays behind the choice as fallback, and the Chinese companion faces still apply.": "你已安装的字体 — 与「设置 → 外观 → 字体」中相同的列表。主题的默认字体链仍作为回退保留在所选字体之后，中文伴随字体依然生效。",
+  "Your fonts could not be listed here — type the family name exactly as your system knows it (browse what is installed under Settings → Appearance → Font). The theme's default chain stays behind it as fallback, and the Chinese companion faces still apply.": "无法在此列出你的字体 — 请按系统中的名称准确输入字族名（可在「设置 → 外观 → 字体」中浏览已安装的字体）。主题的默认字体链仍作为回退保留在其后，中文伴随字体依然生效。",
+  "— pick a font —": "— 选择字体 —",
+  "(not found on this system)": "（此系统中未找到）",
+  "e.g. Avenir Next": "例如 Avenir Next"
+};
+function tzh(s) {
+  try {
+    var l = window.localStorage.getItem("language");
+    if (l && String(l).toLowerCase().indexOf("zh") === 0) return TUFTE_ZH[s] || s;
+  } catch (e) {}
+  return s;
+}
+
 /* ── Typefaces (Tufte theme) ────────────────────────────────────────────
  * The GUI for the Tufte theme's typeface knobs — two Latin series (face
  * + weight each) and two Chinese companions (face each, plus a fixed
@@ -5626,19 +5861,20 @@ class TufteSuiteSettingTab extends obsidian.PluginSettingTab {
     const containerEl = this.containerEl;
     containerEl.empty();
 
-    new obsidian.Setting(containerEl).setName("Bundled plugins").setHeading();
+    new obsidian.Setting(containerEl).setName(tzh("Bundled plugins")).setHeading();
     containerEl.createEl("p", {
       cls: "setting-item-description",
-      text:
+      text: tzh(
         "Tufte Suite bundles the four standalone Tufte plugins as switchable modules. " +
-        "Keep the standalone plugins disabled while Tufte Suite is enabled, or " +
-        "everything renders twice. Toggling a module applies immediately."
+          "Keep the standalone plugins disabled while Tufte Suite is enabled, or " +
+          "everything renders twice. Toggling a module applies immediately."
+      )
     });
 
     for (const def of SUBMODULES) {
       new obsidian.Setting(containerEl)
         .setName(def.name)
-        .setDesc(def.blurb)
+        .setDesc(tzh(def.blurb))
         .addToggle((t) =>
           t.setValue(this.plugin.isModuleEnabled(def.key)).onChange(async (v) => {
             await this.plugin.setModuleEnabled(def.key, v);
@@ -5661,21 +5897,22 @@ class TufteSuiteSettingTab extends obsidian.PluginSettingTab {
     // one tab per plugin id), so sub-navigation lives inside the page. NB:
     // every wrapper here carries a class — the one bare classless <div>
     // per section is reserved for the sub-plugin tabs above.
-    new obsidian.Setting(containerEl).setName("Typefaces (Tufte theme)").setHeading();
+    new obsidian.Setting(containerEl).setName(tzh("Typefaces (Tufte theme)")).setHeading();
     containerEl.createEl("p", {
       cls: "setting-item-description",
-      text:
+      text: tzh(
         "Faces and weights for the Tufte theme's two type series — the serif " +
-        "reading register and the sans data/interface register. Changes apply " +
-        "immediately and persist with the Suite's settings; 'Theme default' " +
-        "hands a knob back to the theme. Chinese companion faces follow " +
-        "automatically. Requires the Tufte theme (inert under any other theme)."
+          "reading register and the sans data/interface register. Changes apply " +
+          "immediately and persist with the Suite's settings; 'Theme default' " +
+          "hands a knob back to the theme. Chinese companion faces follow " +
+          "automatically. Requires the Tufte theme (inert under any other theme)."
+      )
     });
 
     if (!this.typefaceTab) this.typefaceTab = "latin";
     const tabsEl = containerEl.createDiv({ cls: "tufte-suite-typeface-tabs" });
     for (const t of [["latin", "Latin · 西文"], ["cjk", "Chinese · 中文"]]) {
-      const btn = tabsEl.createEl("button", { text: t[1], cls: "tufte-suite-typeface-tab" });
+      const btn = tabsEl.createEl("button", { text: tzh(t[1]), cls: "tufte-suite-typeface-tab" });
       if (this.typefaceTab === t[0]) btn.addClass("is-active");
       btn.addEventListener("click", () => {
         this.typefaceTab = t[0];
@@ -5687,12 +5924,12 @@ class TufteSuiteSettingTab extends obsidian.PluginSettingTab {
     for (const def of TYPEFACE_SETTINGS) {
       if (def.tab !== this.typefaceTab) continue;
       new obsidian.Setting(paneEl)
-        .setName(def.name)
-        .setDesc(def.desc)
+        .setName(tzh(def.name))
+        .setDesc(tzh(def.desc))
         .addDropdown((d) => {
-          d.addOption("", def.defaultLabel);
-          for (const opt of def.options) d.addOption(opt[0], opt[1]);
-          if (def.customKey) d.addOption(CUSTOM_FACE, "Other — a font installed on your system…");
+          d.addOption("", tzh(def.defaultLabel));
+          for (const opt of def.options) d.addOption(opt[0], tzh(opt[1]));
+          if (def.customKey) d.addOption(CUSTOM_FACE, tzh("Other — a font installed on your system…"));
           d.setValue(this.plugin.getTypeface(def.key));
           d.onChange(async (v) => {
             // Leaving "Other" clears the paired custom name, so storage
@@ -5719,32 +5956,36 @@ class TufteSuiteSettingTab extends obsidian.PluginSettingTab {
       // paint that arrives before the list has been read (e.g. reopening
       // settings with a saved "Other" choice).
       if (def.customKey && this.plugin.getTypeface(def.key) === CUSTOM_FACE) {
-        const row = new obsidian.Setting(paneEl).setName(def.customName);
+        const row = new obsidian.Setting(paneEl).setName(tzh(def.customName));
         const fonts = def.customFilter === "cjk" ? this.plugin.chineseFonts : this.plugin.systemFonts;
         if (fonts === null) {
-          row.setDesc("Reading your installed fonts…");
+          row.setDesc(tzh("Reading your installed fonts…"));
           this.plugin.listFontsFor(def).then(() => this.display());
         } else if (fonts.length) {
           row
             .setDesc(
               def.customFilter === "cjk"
-                ? "Your installed Chinese fonts — the system list filtered " +
-                  "to families that can actually set Chinese text. The " +
-                  "theme's default chain stays behind the choice as fallback."
-                : "Your installed fonts — the same list as Settings → " +
-                  "Appearance → Font. The theme's default chain stays behind " +
-                  "the choice as fallback, and the Chinese companion faces " +
-                  "still apply."
+                ? tzh(
+                    "Your installed Chinese fonts — the system list filtered " +
+                      "to families that can actually set Chinese text. The " +
+                      "theme's default chain stays behind the choice as fallback."
+                  )
+                : tzh(
+                    "Your installed fonts — the same list as Settings → " +
+                      "Appearance → Font. The theme's default chain stays behind " +
+                      "the choice as fallback, and the Chinese companion faces " +
+                      "still apply."
+                  )
             )
             .addDropdown((d) => {
-              d.addOption("", "— pick a font —");
+              d.addOption("", tzh("— pick a font —"));
               const current = this.plugin.getTypeface(def.customKey);
               let listed = false;
               for (const fam of fonts) {
                 d.addOption(fam, fam);
                 if (fam === current) listed = true;
               }
-              if (current && !listed) d.addOption(current, current + " (not found on this system)");
+              if (current && !listed) d.addOption(current, current + " " + tzh("(not found on this system)"));
               d.setValue(current);
               d.onChange(async (v) => {
                 await this.plugin.setTypeface(def.customKey, v);
@@ -5753,14 +5994,16 @@ class TufteSuiteSettingTab extends obsidian.PluginSettingTab {
         } else {
           row
             .setDesc(
-              "Your fonts could not be listed here — type the family name " +
-              "exactly as your system knows it (browse what is installed " +
-              "under Settings → Appearance → Font). The theme's default " +
-              "chain stays behind it as fallback, and the Chinese " +
-              "companion faces still apply."
+              tzh(
+                "Your fonts could not be listed here — type the family name " +
+                  "exactly as your system knows it (browse what is installed " +
+                  "under Settings → Appearance → Font). The theme's default " +
+                  "chain stays behind it as fallback, and the Chinese " +
+                  "companion faces still apply."
+              )
             )
             .addText((t) => {
-              t.setPlaceholder("e.g. Avenir Next");
+              t.setPlaceholder(tzh("e.g. Avenir Next"));
               t.setValue(this.plugin.getTypeface(def.customKey));
               t.onChange(async (v) => {
                 await this.plugin.setTypeface(def.customKey, v);
@@ -6084,7 +6327,9 @@ module.exports = class TufteSuitePlugin extends obsidian.Plugin {
       } catch (e) {
         console.error("Tufte Suite: failed to load module " + def.id, e);
         new obsidian.Notice(
-          'Tufte Suite: module "' + def.name + '" failed to load - see developer console.'
+          tzh('Tufte Suite: module "') +
+            def.name +
+            tzh('" failed to load - see developer console.')
         );
       }
     }
@@ -6198,12 +6443,16 @@ module.exports = class TufteSuitePlugin extends obsidian.Plugin {
       const dupes = SUBMODULES.filter((d) => enabled.has(d.id)).map((d) => d.name);
       if (dupes.length) {
         new obsidian.Notice(
-          "Tufte Suite: " +
-            dupes.join(", ") +
-            (dupes.length > 1 ? " are" : " is") +
-            " also enabled standalone. Disable the standalone version" +
-            (dupes.length > 1 ? "s" : "") +
-            " to avoid double rendering.",
+          tzh("Tufte Suite: ") === "Tufte Suite: "
+            ? "Tufte Suite: " +
+              dupes.join(", ") +
+              (dupes.length > 1 ? " are" : " is") +
+              " also enabled standalone. Disable the standalone version" +
+              (dupes.length > 1 ? "s" : "") +
+              " to avoid double rendering."
+            : tzh("Tufte Suite: ") +
+              dupes.join("、") +
+              " 同时以独立插件方式启用。请禁用独立版本，以避免重复渲染。",
           10000
         );
       }

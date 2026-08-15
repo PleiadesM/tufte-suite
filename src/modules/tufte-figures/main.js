@@ -7,6 +7,106 @@ const {
   Notice
 } = require("obsidian");
 
+// --- Simplified Chinese UI strings ------------------------------------------
+// Keyed by the exact English literal; tzh() falls back to its input, so the
+// English behaviour is byte-identical by construction. The lookup is lazy
+// (localStorage is read per call) so a language change takes effect without a
+// reload of the module.
+var TUFTE_ZH = {
+  // commands
+  "Insert figure": "插入图",
+  "Edit figure at cursor": "编辑光标处的图",
+  "Insert image quilt": "插入图像拼图",
+  "Insert figure reference": "插入图引用",
+  "Renumber all figures": "重新编号所有图",
+  // notices
+  "Renumbered": "已重新编号",
+  "No figures found to renumber": "未找到可重新编号的图",
+  "Tufte Figures: couldn't save the image.": "Tufte Figures：无法保存图片。",
+  "Tufte Figures: enter a figure number.": "Tufte Figures：请输入图编号。",
+  "Tufte Figures: a row holds at most 5 images.": "Tufte Figures：一行最多容纳 5 张图片。",
+  "Tufte Figures: add at least 2 images, or use the Basic tab.": "Tufte Figures：请至少添加 2 张图片，或使用“基础”选项卡。",
+  "Tufte Figures: couldn't read the image.": "Tufte Figures：无法读取图片。",
+  "Tufte Figures: add at least one image to the quilt.": "Tufte Figures：请至少向拼图添加一张图片。",
+  "Tufte Figures: images still loading — try again in a moment.": "Tufte Figures：图片仍在加载 — 请稍候重试。",
+  "Tufte Figures: couldn't render the quilt.": "Tufte Figures：无法渲染拼图。",
+  "Tufte Figures: couldn't generate the quilt.": "Tufte Figures：无法生成拼图。",
+  "Tufte Figures: couldn't load the saved quilt.": "Tufte Figures：无法载入已保存的拼图。",
+  "Tufte Figures: the image link is empty.": "Tufte Figures：图片链接为空。",
+  "Figure reference copied": "已复制图引用",
+  "Couldn't access the clipboard": "无法访问剪贴板",
+  "Quilt updated": "拼图已更新",
+  "Quilt inserted": "拼图已插入",
+  // settings tab
+  "Intercept image drops and pastes": "拦截图片拖放与粘贴",
+  "When on, dragging or pasting an image into the editor opens the figure modal. Turn off to use plain Obsidian embedding and the 'Insert figure' command only.": "开启后，将图片拖入或粘贴到编辑器会打开图的对话框。关闭则仅使用 Obsidian 原生嵌入，并只能通过“插入图”命令。",
+  "Figure label prefix": "图标签前缀",
+  "Prefix shown before the number in margin-figure captions, e.g. 'Fig.' → 'Fig. 1.'": "边栏图注中显示在编号前的前缀，例如 'Fig.' → 'Fig. 1.'",
+  "Image quilt output folder": "图像拼图输出文件夹",
+  "Vault-relative folder where generated image-quilt PNGs are saved (created if missing). Leave blank for the vault root. Default: img/quilt.": "保存生成的图像拼图 PNG 的文件夹（相对于库根目录，不存在时自动创建）。留空则保存到库根目录。默认：img/quilt。",
+  // figure reference modal
+  "Figure number": "图编号",
+  "Detected figures:": "已检测到的图：",
+  "No figure anchors detected in this note yet.": "本笔记中尚未检测到图锚点。",
+  "Reference": "引用",
+  "This will be inserted at the cursor.": "将插入到光标处。",
+  "Insert reference": "插入引用",
+  // figure modal — shell + tabs
+  "Edit Tufte figure": "编辑 Tufte 图",
+  "Insert Tufte figure": "插入 Tufte 图",
+  "Basic": "基础",
+  "Multiple images": "多图",
+  "Image quilt": "图像拼图",
+  // figure modal — basic tab
+  "Image link": "图片链接",
+  "The embed inserted into the figure.": "插入到图中的嵌入代码。",
+  "Display": "显示方式",
+  "Default — image in column, caption in margin": "默认 — 图片在正文栏，图注在边栏",
+  "Full-width — image spans column + margin": "通栏 — 图片横跨正文栏与边栏",
+  "Margin figure — [!figure-margin]": "边栏图 — [!figure-margin]",
+  "Auto-suggested; edit to set it manually.": "自动建议；可编辑以手动指定。",
+  "Alt text": "替代文本",
+  "Caption": "图注",
+  "Size (px)": "尺寸（像素）",
+  "Width × height. Ratio is locked — editing one updates the other. Leave blank for the original size.": "宽 × 高。比例已锁定 — 修改其一会同步另一项。留空则使用原始尺寸。",
+  "width": "宽",
+  "height": "高",
+  "In-text reference": "正文中的引用",
+  "Clickable link to this figure — copy it into your prose.": "指向此图的可点击链接 — 复制到正文中使用。",
+  "Copy": "复制",
+  "Save figure": "保存图",
+  // figure modal — multiple-images tab
+  "A row of up to 5 images sharing one caption. Heights are equalised; each image keeps its ratio.": "一行最多 5 张图片共用一条图注。高度统一，各图保持自身比例。",
+  "Default — row in column, captions in margin": "默认 — 图片行在正文栏，图注在边栏",
+  "Full-width — row spans column + margin": "通栏 — 图片行横跨正文栏与边栏",
+  "Row height (px)": "行高（像素）",
+  "Shared height; per-image widths follow each ratio.": "统一高度；各图宽度按自身比例计算。",
+  "Drag images here, or click to browse": "将图片拖到此处，或点击浏览",
+  "individual caption": "单张图注",
+  "Overall caption": "总图注",
+  // figure modal — image-quilt tab
+  "Combine many images into one quilt — a tight grid of uniform-height tiles. Drag tiles to reorder, ✕ to remove. Generates a single transparent PNG inserted as a figure; re-editable later via 'Edit figure at cursor'.": "将多张图片合成为一张拼图 — 由等高瓦片组成的紧密网格。拖动瓦片可重新排序，✕ 可移除。生成一张透明 PNG 并作为图插入；之后可通过“编辑光标处的图”再次编辑。",
+  "Default — quilt in column, caption in margin": "默认 — 拼图在正文栏，图注在边栏",
+  "Full-width — quilt spans column + margin": "通栏 — 拼图横跨正文栏与边栏",
+  "Tile height (px)": "瓦片高度（像素）",
+  "Shared height of every tile; widths follow each image's ratio.": "所有瓦片的统一高度；宽度按各图比例计算。",
+  "Zoom (%)": "缩放（%）",
+  "Magnify and crop the image inside each tile.": "放大并裁剪每个瓦片内的图片。",
+  "Grayscale": "灰度",
+  "Render the quilt in black and white.": "以黑白方式渲染拼图。",
+  "Loading quilt…": "正在载入拼图…",
+  "No images yet — drop some below to build the quilt.": "尚无图片 — 在下方拖入图片以构建拼图。",
+  "Save quilt": "保存拼图",
+  "Generate & insert quilt": "生成并插入拼图"
+};
+function tzh(s) {
+  try {
+    var l = window.localStorage.getItem("language");
+    if (l && String(l).toLowerCase().indexOf("zh") === 0) return TUFTE_ZH[s] || s;
+  } catch (e) {}
+  return s;
+}
+
 // Tufte Figures — drop-to-insert Tufte-style figures.
 //
 // Three display modes, written as portable Markdown and rendered by the
@@ -82,7 +182,7 @@ module.exports = class TufteFiguresPlugin extends Plugin {
 
     this.addCommand({
       id: "insert-figure",
-      name: "Insert figure",
+      name: tzh("Insert figure"),
       editorCallback: (editor) => {
         const line = editor.getLine(editor.getCursor().line) || "";
         const m = line.match(/!\[\[[^\]]+\]\]|!\[[^\]]*\]\([^)]+\)/);
@@ -99,7 +199,7 @@ module.exports = class TufteFiguresPlugin extends Plugin {
     // save. Bind a hotkey in Settings → Hotkeys.
     this.addCommand({
       id: "edit-figure",
-      name: "Edit figure at cursor",
+      name: tzh("Edit figure at cursor"),
       editorCheckCallback: (checking, editor) => {
         const found = findFigureAtCursor(editor);
         if (!found) return false;
@@ -135,7 +235,7 @@ module.exports = class TufteFiguresPlugin extends Plugin {
 
     this.addCommand({
       id: "insert-image-quilt",
-      name: "Insert image quilt",
+      name: tzh("Insert image quilt"),
       editorCallback: (editor) => {
         new FigureModal(this.app, this, editor, {
           embed: "",
@@ -149,7 +249,7 @@ module.exports = class TufteFiguresPlugin extends Plugin {
 
     this.addCommand({
       id: "insert-figure-reference",
-      name: "Insert figure reference",
+      name: tzh("Insert figure reference"),
       editorCallback: (editor) => {
         new FigureReferenceModal(this.app, this, editor).open();
       }
@@ -157,13 +257,15 @@ module.exports = class TufteFiguresPlugin extends Plugin {
 
     this.addCommand({
       id: "renumber-figures",
-      name: "Renumber all figures",
+      name: tzh("Renumber all figures"),
       editorCallback: (editor) => {
         const count = renumberAllFigures(editor);
         new Notice(
           count
-            ? `Renumbered ${count} figure${count === 1 ? "" : "s"}`
-            : "No figures found to renumber"
+            ? tzh("Renumbered") === "Renumbered"
+              ? `Renumbered ${count} figure${count === 1 ? "" : "s"}`
+              : `${tzh("Renumbered")} ${count} 个图`
+            : tzh("No figures found to renumber")
         );
       }
     });
@@ -486,7 +588,7 @@ module.exports = class TufteFiguresPlugin extends Plugin {
       embed = this.buildEmbed(tfile, sourcePath);
     } catch (e) {
       console.error("tufte-figures: failed to save dropped image", e);
-      new Notice("Tufte Figures: couldn't save the image.");
+      new Notice(tzh("Tufte Figures: couldn't save the image."));
       return;
     }
 
@@ -2044,14 +2146,14 @@ class FigureReferenceModal extends Modal {
     const known = figureAnchorNumbers(this.editor.getValue());
     contentEl.empty();
     contentEl.addClass("tufte-figure-modal");
-    contentEl.createEl("h3", { text: "Insert figure reference" });
+    contentEl.createEl("h3", { text: tzh("Insert figure reference") });
 
     new Setting(contentEl)
-      .setName("Figure number")
+      .setName(tzh("Figure number"))
       .setDesc(
         known.length
-          ? `Detected figures: ${known.join(", ")}.`
-          : "No figure anchors detected in this note yet."
+          ? `${tzh("Detected figures:")} ${known.join(", ")}.`
+          : tzh("No figure anchors detected in this note yet.")
       )
       .addText((t) => {
         t.setValue(this.number).onChange((v) => {
@@ -2071,8 +2173,8 @@ class FigureReferenceModal extends Modal {
       });
 
     new Setting(contentEl)
-      .setName("Reference")
-      .setDesc("This will be inserted at the cursor.")
+      .setName(tzh("Reference"))
+      .setDesc(tzh("This will be inserted at the cursor."))
       .addText((t) => {
         this.referenceInput = t;
         t.setValue(this.referenceText());
@@ -2081,7 +2183,7 @@ class FigureReferenceModal extends Modal {
 
     new Setting(contentEl).addButton((b) =>
       b
-        .setButtonText("Insert reference")
+        .setButtonText(tzh("Insert reference"))
         .setCta()
         .onClick(() => this.doInsert())
     );
@@ -2098,7 +2200,7 @@ class FigureReferenceModal extends Modal {
   doInsert() {
     const number = (this.number || "").trim();
     if (!/^\d+$/.test(number)) {
-      new Notice("Tufte Figures: enter a figure number.");
+      new Notice(tzh("Tufte Figures: enter a figure number."));
       return;
     }
     insertInlineText(this.editor, figureReferenceText(number));
@@ -2225,13 +2327,13 @@ class FigureModal extends Modal {
     contentEl.empty();
     contentEl.addClass("tufte-figure-modal");
     contentEl.createEl("h3", {
-      text: this.isEdit ? "Edit Tufte figure" : "Insert Tufte figure"
+      text: this.isEdit ? tzh("Edit Tufte figure") : tzh("Insert Tufte figure")
     });
 
     const tabs = contentEl.createDiv({ cls: "tufte-fig-tabs" });
-    const basicBtn = tabs.createEl("button", { text: "Basic" });
-    const multiBtn = tabs.createEl("button", { text: "Multiple images" });
-    const quiltBtn = tabs.createEl("button", { text: "Image quilt" });
+    const basicBtn = tabs.createEl("button", { text: tzh("Basic") });
+    const multiBtn = tabs.createEl("button", { text: tzh("Multiple images") });
+    const quiltBtn = tabs.createEl("button", { text: tzh("Image quilt") });
     const basicEl = contentEl.createDiv({ cls: "tufte-fig-tab-panel" });
     const multiEl = contentEl.createDiv({ cls: "tufte-fig-tab-panel" });
     const quiltEl = contentEl.createDiv({ cls: "tufte-fig-tab-panel" });
@@ -2262,8 +2364,8 @@ class FigureModal extends Modal {
 
   buildBasicTab(contentEl) {
     new Setting(contentEl)
-      .setName("Image link")
-      .setDesc("The embed inserted into the figure.")
+      .setName(tzh("Image link"))
+      .setDesc(tzh("The embed inserted into the figure."))
       .addText((t) =>
         t.setValue(this.embed).onChange((v) => {
           this.embed = v;
@@ -2271,18 +2373,18 @@ class FigureModal extends Modal {
         })
       );
 
-    new Setting(contentEl).setName("Display").addDropdown((d) => {
-      d.addOption("default", "Default — image in column, caption in margin");
-      d.addOption("full", "Full-width — image spans column + margin");
-      d.addOption("margin", "Margin figure — [!figure-margin]");
+    new Setting(contentEl).setName(tzh("Display")).addDropdown((d) => {
+      d.addOption("default", tzh("Default — image in column, caption in margin"));
+      d.addOption("full", tzh("Full-width — image spans column + margin"));
+      d.addOption("margin", tzh("Margin figure — [!figure-margin]"));
       d.setValue(this.mode).onChange((v) => {
         this.mode = v;
       });
     });
 
     new Setting(contentEl)
-      .setName("Figure number")
-      .setDesc("Auto-suggested; edit to set it manually.")
+      .setName(tzh("Figure number"))
+      .setDesc(tzh("Auto-suggested; edit to set it manually."))
       .addText((t) =>
         t.setValue(this.number).onChange((v) => {
           this.number = v.trim();
@@ -2291,14 +2393,14 @@ class FigureModal extends Modal {
       );
 
     new Setting(contentEl)
-      .setName("Alt text")
+      .setName(tzh("Alt text"))
       .addText((t) =>
         t.setValue(this.alt).onChange((v) => {
           this.alt = v;
         })
       );
 
-    new Setting(contentEl).setName("Caption").addTextArea((t) => {
+    new Setting(contentEl).setName(tzh("Caption")).addTextArea((t) => {
       t.setValue(this.caption).onChange((v) => {
         this.caption = v;
       });
@@ -2307,11 +2409,11 @@ class FigureModal extends Modal {
     });
 
     new Setting(contentEl)
-      .setName("Size (px)")
-      .setDesc("Width × height. Ratio is locked — editing one updates the other. Leave blank for the original size.")
+      .setName(tzh("Size (px)"))
+      .setDesc(tzh("Width × height. Ratio is locked — editing one updates the other. Leave blank for the original size."))
       .addText((t) => {
         this.widthInput = t;
-        t.setPlaceholder("width");
+        t.setPlaceholder(tzh("width"));
         t.setValue(this.width);
         t.inputEl.type = "number";
         t.inputEl.min = "1";
@@ -2320,7 +2422,7 @@ class FigureModal extends Modal {
       })
       .addText((t) => {
         this.heightInput = t;
-        t.setPlaceholder("height");
+        t.setPlaceholder(tzh("height"));
         t.setValue(this.height);
         t.inputEl.type = "number";
         t.inputEl.min = "1";
@@ -2329,27 +2431,27 @@ class FigureModal extends Modal {
       });
 
     const indicator = new Setting(contentEl)
-      .setName("In-text reference")
-      .setDesc("Clickable link to this figure — copy it into your prose.");
+      .setName(tzh("In-text reference"))
+      .setDesc(tzh("Clickable link to this figure — copy it into your prose."));
     indicator.addText((t) => {
       this.indicatorInput = t;
       t.setValue(this.indicatorText());
       t.inputEl.readOnly = true;
     });
     indicator.addButton((b) =>
-      b.setButtonText("Copy").onClick(async () => {
+      b.setButtonText(tzh("Copy")).onClick(async () => {
         try {
           await navigator.clipboard.writeText(this.indicatorText());
-          new Notice("Figure reference copied");
+          new Notice(tzh("Figure reference copied"));
         } catch {
-          new Notice("Couldn't access the clipboard");
+          new Notice(tzh("Couldn't access the clipboard"));
         }
       })
     );
 
     new Setting(contentEl).addButton((b) =>
       b
-        .setButtonText(this.isEdit ? "Save figure" : "Insert figure")
+        .setButtonText(this.isEdit ? tzh("Save figure") : tzh("Insert figure"))
         .setCta()
         .onClick(() => this.doInsert())
     );
@@ -2358,12 +2460,12 @@ class FigureModal extends Modal {
   buildMultiTab(contentEl) {
     contentEl.createEl("p", {
       cls: "tufte-fig-multi-hint",
-      text: "A row of up to 5 images sharing one caption. Heights are equalised; each image keeps its ratio."
+      text: tzh("A row of up to 5 images sharing one caption. Heights are equalised; each image keeps its ratio.")
     });
 
-    new Setting(contentEl).setName("Display").addDropdown((d) => {
-      d.addOption("default", "Default — row in column, captions in margin");
-      d.addOption("full", "Full-width — row spans column + margin");
+    new Setting(contentEl).setName(tzh("Display")).addDropdown((d) => {
+      d.addOption("default", tzh("Default — row in column, captions in margin"));
+      d.addOption("full", tzh("Full-width — row spans column + margin"));
       // No margin mode: a row of images doesn't lay out well in the margin.
       d.setValue(this.mode === "margin" ? "default" : this.mode).onChange((v) => {
         this.mode = v;
@@ -2371,7 +2473,7 @@ class FigureModal extends Modal {
     });
 
     new Setting(contentEl)
-      .setName("Figure number")
+      .setName(tzh("Figure number"))
       .addText((t) =>
         t.setValue(this.number).onChange((v) => {
           this.number = v.trim();
@@ -2379,8 +2481,8 @@ class FigureModal extends Modal {
       );
 
     new Setting(contentEl)
-      .setName("Row height (px)")
-      .setDesc("Shared height; per-image widths follow each ratio.")
+      .setName(tzh("Row height (px)"))
+      .setDesc(tzh("Shared height; per-image widths follow each ratio."))
       .addText((t) => {
         t.setValue(String(this.rowHeight));
         t.inputEl.type = "number";
@@ -2403,7 +2505,7 @@ class FigureModal extends Modal {
     zone.createSpan({ cls: "tufte-fig-dropzone-plus", text: "+" });
     zone.createSpan({
       cls: "tufte-fig-dropzone-text",
-      text: "Drag images here, or click to browse"
+      text: tzh("Drag images here, or click to browse")
     });
     zone.addEventListener("click", () => this.pickImage());
     zone.addEventListener("dragover", (e) => {
@@ -2413,7 +2515,7 @@ class FigureModal extends Modal {
     zone.addEventListener("dragleave", () => zone.removeClass("is-dragover"));
     zone.addEventListener("drop", (e) => this.onZoneDrop(e, zone));
 
-    new Setting(contentEl).setName("Overall caption").addTextArea((t) => {
+    new Setting(contentEl).setName(tzh("Overall caption")).addTextArea((t) => {
       t.setValue(this.overallCaption).onChange((v) => {
         this.overallCaption = v;
       });
@@ -2423,7 +2525,7 @@ class FigureModal extends Modal {
 
     new Setting(contentEl).addButton((b) =>
       b
-        .setButtonText(this.isEdit ? "Save figure" : "Insert figure")
+        .setButtonText(this.isEdit ? tzh("Save figure") : tzh("Insert figure"))
         .setCta()
         .onClick(() => this.doInsertMulti())
     );
@@ -2453,7 +2555,7 @@ class FigureModal extends Modal {
 
       const cap = row.createEl("input", { type: "text" });
       cap.value = entry.caption;
-      cap.placeholder = "individual caption";
+      cap.placeholder = tzh("individual caption");
       cap.addClass("tufte-fig-entry-caption");
       cap.oninput = () => {
         entry.caption = cap.value;
@@ -2469,7 +2571,7 @@ class FigureModal extends Modal {
 
   pickImage() {
     if (this.entries.length >= 5) {
-      new Notice("Tufte Figures: a row holds at most 5 images.");
+      new Notice(tzh("Tufte Figures: a row holds at most 5 images."));
       return;
     }
     const input = document.createElement("input");
@@ -2498,7 +2600,7 @@ class FigureModal extends Modal {
       this.addEntryFromTFile(tfile);
     } catch (e) {
       console.error("tufte-figures: failed to save image", e);
-      new Notice("Tufte Figures: couldn't save the image.");
+      new Notice(tzh("Tufte Figures: couldn't save the image."));
     }
   }
 
@@ -2594,7 +2696,7 @@ class FigureModal extends Modal {
 
   doInsertMulti() {
     if (this.entries.length < 2) {
-      new Notice("Tufte Figures: add at least 2 images, or use the Basic tab.");
+      new Notice(tzh("Tufte Figures: add at least 2 images, or use the Basic tab."));
       return;
     }
     // Fill in any missing widths without clobbering ones already set (changing
@@ -2624,15 +2726,16 @@ class FigureModal extends Modal {
   buildQuiltTab(contentEl) {
     contentEl.createEl("p", {
       cls: "tufte-fig-multi-hint",
-      text:
+      text: tzh(
         "Combine many images into one quilt — a tight grid of uniform-height tiles. " +
-        "Drag tiles to reorder, ✕ to remove. Generates a single transparent PNG inserted " +
-        "as a figure; re-editable later via 'Edit figure at cursor'."
+          "Drag tiles to reorder, ✕ to remove. Generates a single transparent PNG inserted " +
+          "as a figure; re-editable later via 'Edit figure at cursor'."
+      )
     });
 
-    new Setting(contentEl).setName("Display").addDropdown((d) => {
-      d.addOption("default", "Default — quilt in column, caption in margin");
-      d.addOption("full", "Full-width — quilt spans column + margin");
+    new Setting(contentEl).setName(tzh("Display")).addDropdown((d) => {
+      d.addOption("default", tzh("Default — quilt in column, caption in margin"));
+      d.addOption("full", tzh("Full-width — quilt spans column + margin"));
       // No margin mode: a wide quilt doesn't lay out well in the margin.
       d.setValue(this.mode === "margin" ? "default" : this.mode).onChange((v) => {
         this.mode = v;
@@ -2640,7 +2743,7 @@ class FigureModal extends Modal {
     });
 
     new Setting(contentEl)
-      .setName("Figure number")
+      .setName(tzh("Figure number"))
       .addText((t) =>
         t.setValue(this.number).onChange((v) => {
           this.number = v.trim();
@@ -2648,8 +2751,8 @@ class FigureModal extends Modal {
       );
 
     new Setting(contentEl)
-      .setName("Tile height (px)")
-      .setDesc("Shared height of every tile; widths follow each image's ratio.")
+      .setName(tzh("Tile height (px)"))
+      .setDesc(tzh("Shared height of every tile; widths follow each image's ratio."))
       .addSlider((s) => {
         this._quiltRowSlider = s;
         s.setLimits(40, 320, 5);
@@ -2662,8 +2765,8 @@ class FigureModal extends Modal {
       });
 
     new Setting(contentEl)
-      .setName("Zoom (%)")
-      .setDesc("Magnify and crop the image inside each tile.")
+      .setName(tzh("Zoom (%)"))
+      .setDesc(tzh("Magnify and crop the image inside each tile."))
       .addSlider((s) => {
         this._quiltZoomSlider = s;
         s.setLimits(100, 300, 5);
@@ -2676,8 +2779,8 @@ class FigureModal extends Modal {
       });
 
     new Setting(contentEl)
-      .setName("Grayscale")
-      .setDesc("Render the quilt in black and white.")
+      .setName(tzh("Grayscale"))
+      .setDesc(tzh("Render the quilt in black and white."))
       .addToggle((t) => {
         this._quiltGrayToggle = t;
         t.setValue(this.quilt.grayscale).onChange((v) => {
@@ -2692,7 +2795,7 @@ class FigureModal extends Modal {
     zone.createSpan({ cls: "tufte-fig-dropzone-plus", text: "+" });
     zone.createSpan({
       cls: "tufte-fig-dropzone-text",
-      text: "Drag images here, or click to browse"
+      text: tzh("Drag images here, or click to browse")
     });
     zone.addEventListener("click", () => this.pickQuiltImages());
     zone.addEventListener("dragover", (e) => {
@@ -2702,7 +2805,7 @@ class FigureModal extends Modal {
     zone.addEventListener("dragleave", () => zone.removeClass("is-dragover"));
     zone.addEventListener("drop", (e) => this.onQuiltZoneDrop(e, zone));
 
-    new Setting(contentEl).setName("Caption").addTextArea((t) => {
+    new Setting(contentEl).setName(tzh("Caption")).addTextArea((t) => {
       t.setValue(this.caption).onChange((v) => {
         this.caption = v;
       });
@@ -2712,7 +2815,7 @@ class FigureModal extends Modal {
 
     new Setting(contentEl).addButton((b) =>
       b
-        .setButtonText(this.isEdit ? "Save quilt" : "Generate & insert quilt")
+        .setButtonText(this.isEdit ? tzh("Save quilt") : tzh("Generate & insert quilt"))
         .setCta()
         .onClick(() => this.doInsertQuilt())
     );
@@ -2771,7 +2874,7 @@ class FigureModal extends Modal {
       await this.addQuiltTile(new Uint8Array(buffer), ext, file.name || `image.${ext}`);
     } catch (e) {
       console.error("tufte-figures: failed to read quilt image", e);
-      new Notice("Tufte Figures: couldn't read the image.");
+      new Notice(tzh("Tufte Figures: couldn't read the image."));
     }
   }
 
@@ -2819,13 +2922,13 @@ class FigureModal extends Modal {
     stage.empty();
 
     if (this.quilt.loading) {
-      stage.createDiv({ cls: "tufte-quilt-empty", text: "Loading quilt…" });
+      stage.createDiv({ cls: "tufte-quilt-empty", text: tzh("Loading quilt…") });
       return;
     }
     if (!this.quilt.tiles.length) {
       stage.createDiv({
         cls: "tufte-quilt-empty",
-        text: "No images yet — drop some below to build the quilt."
+        text: tzh("No images yet — drop some below to build the quilt.")
       });
       return;
     }
@@ -2936,11 +3039,11 @@ class FigureModal extends Modal {
 
   async doInsertQuilt() {
     if (!this.quilt.tiles.length) {
-      new Notice("Tufte Figures: add at least one image to the quilt.");
+      new Notice(tzh("Tufte Figures: add at least one image to the quilt."));
       return;
     }
     if (this.quilt.tiles.some((t) => !t.imgEl)) {
-      new Notice("Tufte Figures: images still loading — try again in a moment.");
+      new Notice(tzh("Tufte Figures: images still loading — try again in a moment."));
       return;
     }
     try {
@@ -2961,7 +3064,7 @@ class FigureModal extends Modal {
       // Render the quilt PNG.
       const blob = await this.renderQuiltCanvas();
       if (!blob) {
-        new Notice("Tufte Figures: couldn't render the quilt.");
+        new Notice(tzh("Tufte Figures: couldn't render the quilt."));
         return;
       }
       const pngBuf = await blob.arrayBuffer();
@@ -3013,11 +3116,11 @@ class FigureModal extends Modal {
         labelPrefix: this.plugin.settings.labelPrefix
       });
       this.commitBlock(block);
-      new Notice(this.isEdit ? "Quilt updated" : "Quilt inserted");
+      new Notice(this.isEdit ? tzh("Quilt updated") : tzh("Quilt inserted"));
       this.close();
     } catch (e) {
       console.error("tufte-figures: failed to generate quilt", e);
-      new Notice("Tufte Figures: couldn't generate the quilt.");
+      new Notice(tzh("Tufte Figures: couldn't generate the quilt."));
     }
   }
 
@@ -3076,7 +3179,7 @@ class FigureModal extends Modal {
       this.quilt.tiles = tiles;
     } catch (e) {
       console.error("tufte-figures: failed to load quilt config", e);
-      new Notice("Tufte Figures: couldn't load the saved quilt.");
+      new Notice(tzh("Tufte Figures: couldn't load the saved quilt."));
     } finally {
       this.quilt.loading = false;
       // Sync widgets that were built before the async config arrived.
@@ -3169,7 +3272,7 @@ class FigureModal extends Modal {
 
   doInsert() {
     if (!this.embed || !this.embed.trim()) {
-      new Notice("Tufte Figures: the image link is empty.");
+      new Notice(tzh("Tufte Figures: the image link is empty."));
       return;
     }
     // Ratio locked → encode width only (height stays auto, preserving the
@@ -3226,9 +3329,11 @@ class FigureSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName("Intercept image drops and pastes")
+      .setName(tzh("Intercept image drops and pastes"))
       .setDesc(
-        "When on, dragging or pasting an image into the editor opens the figure modal. Turn off to use plain Obsidian embedding and the 'Insert figure' command only."
+        tzh(
+          "When on, dragging or pasting an image into the editor opens the figure modal. Turn off to use plain Obsidian embedding and the 'Insert figure' command only."
+        )
       )
       .addToggle((t) =>
         t.setValue(this.plugin.settings.interceptDrops).onChange(async (v) => {
@@ -3238,9 +3343,11 @@ class FigureSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Figure label prefix")
+      .setName(tzh("Figure label prefix"))
       .setDesc(
-        "Prefix shown before the number in margin-figure captions, e.g. 'Fig.' → 'Fig. 1.'"
+        tzh(
+          "Prefix shown before the number in margin-figure captions, e.g. 'Fig.' → 'Fig. 1.'"
+        )
       )
       .addText((t) =>
         t.setValue(this.plugin.settings.labelPrefix).onChange(async (v) => {
@@ -3250,9 +3357,11 @@ class FigureSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Image quilt output folder")
+      .setName(tzh("Image quilt output folder"))
       .setDesc(
-        "Vault-relative folder where generated image-quilt PNGs are saved (created if missing). Leave blank for the vault root. Default: img/quilt."
+        tzh(
+          "Vault-relative folder where generated image-quilt PNGs are saved (created if missing). Leave blank for the vault root. Default: img/quilt."
+        )
       )
       .addText((t) =>
         t

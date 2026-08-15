@@ -3,6 +3,24 @@ const { ViewPlugin, Decoration, WidgetType } = require("@codemirror/view");
 const { RangeSetBuilder } = require("@codemirror/state");
 const { syntaxTree } = require("@codemirror/language");
 
+// --- Simplified Chinese UI strings ------------------------------------------
+// Keyed by the exact English literal; tzh() falls back to its input, so the
+// English behaviour is byte-identical by construction. The lookup is lazy
+// (localStorage is read per call) so a language change takes effect without a
+// reload of the module.
+var TUFTE_ZH = {
+  "Wrap selection in New Thought (^^…^^)": "将选区包裹为新思路（^^…^^）",
+  "Wrap selection in lead-in (&&…&&)": "将选区包裹为引导词（&&…&&）",
+  "Wrap first character in CJK drop cap (@@…@@)": "将首字包裹为中文首字下沉（@@…@@）"
+};
+function tzh(s) {
+  try {
+    var l = window.localStorage.getItem("language");
+    if (l && String(l).toLowerCase().indexOf("zh") === 0) return TUFTE_ZH[s] || s;
+  } catch (e) {}
+  return s;
+}
+
 /* ============================================================================
    Tufte Inline — inline typography shorthands for the Tufte vault.
 
@@ -78,17 +96,17 @@ module.exports = class TufteInlinePlugin extends Plugin {
     // --- Optional convenience commands (no default hotkeys) ----------------
     this.addCommand({
       id: "wrap-newthought",
-      name: "Wrap selection in New Thought (^^…^^)",
+      name: tzh("Wrap selection in New Thought (^^…^^)"),
       editorCallback: (editor) => wrapSelection(editor, "^^"),
     });
     this.addCommand({
       id: "wrap-leadin",
-      name: "Wrap selection in lead-in (&&…&&)",
+      name: tzh("Wrap selection in lead-in (&&…&&)"),
       editorCallback: (editor) => wrapSelection(editor, "&&"),
     });
     this.addCommand({
       id: "wrap-dropcap",
-      name: "Wrap first character in CJK drop cap (@@…@@)",
+      name: tzh("Wrap first character in CJK drop cap (@@…@@)"),
       editorCallback: (editor) => wrapDropcap(editor),
     });
   }

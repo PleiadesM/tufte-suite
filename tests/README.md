@@ -31,7 +31,7 @@ and evaluated with `new Function(...)`; nothing under the vault is ever written.
 | `harness/load.js` | Reads plugin files as text, evaluates them in sloppy mode with the fake `require` and the shadowed globals. |
 | `harness/fixtures.js` | The fixture corpus (pure data; each env builds its own identical copy). |
 | `harness/assert.js` | Tiny assertion helpers with readable diffs. |
-| `t1…t10`, `run-all.js` | The tests. |
+| `t1…t11`, `run-all.js` | The tests. |
 
 ---
 
@@ -235,6 +235,30 @@ theme's default chain, with leaving Other clearing the name and its row —
 that returning to "Theme default" removes the style and prunes the storage,
 that saved knobs — composed customs included — re-apply on a fresh load, and
 that unloading the plugin removes every inline knob.
+
+**t11** covers the Simplified Chinese localization (added 2026-08-14). Each
+module and the suite runtime carry their own `TUFTE_ZH` table plus a
+`tzh(s)` helper that reads `window.localStorage`'s `"language"` LAZILY, per
+call, matches it as a *prefix* (`zh`, `zh-CN`, `zh-TW`, any case), and falls
+back to its own input — so the English surface is byte-identical by
+construction and t3/t5 keep guarding it at the DOM level. jsdom refuses
+localStorage on the env's opaque origin, so each case installs a tiny store
+of its own and the unseeded default also exercises tzh()'s try/catch escape
+hatch. t11 asserts, with no language set (three ways: no localStorage at
+all, an empty store, `"en"`), the exact English text of the suite tab's two
+headings, the bilingual "Latin · 西文" / "Chinese · 中文" typeface tab bar,
+the first typeface row's name/description/theme-default option, the four
+module toggle rows and the sidenotes blurb, the figures modal's tab labels,
+one command name per module, and the renumber Notice; then, under `"zh"`,
+the Chinese counterparts — including the typeface tab bar collapsing to
+西文/中文, the four Chinese typeface rows, the embedded figures settings
+section, seven figures-modal field labels, and a Chinese Notice — while the
+module DISPLAY names ("Tufte Figures", …) stay English, being product
+names. `zh-TW`/`zh-CN`/`ZH` are checked to hit the same table and `"hzh"` to
+miss it (prefix, not substring). Finally it mirrors the original-vs-suite
+equivalence pattern: the figures module loaded STANDALONE under each
+language must render the same modal tabs, modal field labels, settings rows
+and command names as the suite build does.
 
 ### No behavioural differences found
 
