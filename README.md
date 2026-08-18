@@ -21,11 +21,9 @@ The plugin renders the structure; the [Tufte theme](https://github.com/PleiadesM
 
 ## Install
 
-**Manual (until it reaches the community directory):**
+Tufte Suite is in Obsidian's community plugin directory: Settings → Community plugins → *Browse* → search **Tufte Suite** → Install → Enable. (Or open `obsidian://show-plugin?id=tufte-suite`.) The theme it accompanies is in the community themes directory as **Tufte** (`obsidian://show-theme?name=Tufte`).
 
-1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](../../releases/latest).
-2. Put all three in `YourVault/.obsidian/plugins/tufte-suite/`.
-3. Settings → Community plugins → enable **Tufte Suite**.
+Manual install still works: download `main.js`, `manifest.json`, and `styles.css` from the [latest release](../../releases/latest), put all three in `YourVault/.obsidian/plugins/tufte-suite/`, then Settings → Community plugins → enable **Tufte Suite**.
 
 ### Coming from the four standalone plugins
 
@@ -72,8 +70,18 @@ Built alongside the [Tufte for Obsidian](https://github.com/PleiadesM/TufteObsid
 
 ## Changelog
 
-- **1.2.0** (2026-08-14) — the Suite speaks Chinese, and one tab design rules everywhere. When Obsidian's language is Chinese (`zh` / `zh-CN` / `zh-TW`), the entire UI renders in Simplified Chinese — the settings tab with the whole Typefaces console, both figure modals, all commands, and every notice (~150 strings) — via per-module translation tables keyed by the exact English literals, so the English surface is **byte-identical** under any other locale; the four module display names stay English as product names, and nothing the plugins write into notes (the `Fig.` label, callout syntax) ever translates. The figure modal's Basic / Multiple images / Image quilt tabs adopt the Suite settings' own tab grammar — native buttons, the active one on a 2px accent underline — one tab design across the Suite. New test group `t11-i18n` (the harness is now 11 groups): zh rendering, English byte-identity, locale-prefix cases, and standalone-vs-Suite parity. Modules: figures **1.8.0**, sidenotes **1.8.0**, inline **1.3.0** (backlinks stays 1.0.1). Pairs with theme [Tufte 1.18.0](https://github.com/PleiadesM/TufteObsidian/releases/tag/1.18.0), whose Properties polish and Style Settings 中文 land the same day.
-- **1.1.0** (2026-08-14) — the suite becomes the Tufte theme's typeface console: a new **Typefaces (Tufte theme)** settings section, split into Latin/Chinese in-page tabs, drives the theme's `--tufte-*` knobs as inline body styles (persisted under a reserved `__typefaces` key; theme defaults restored the moment the Suite is disabled). Latin: serif and sans faces (Monotype-leaning recommendations; the theme-bundled Cabin) with all nine weights each. Chinese: 宋体/黑体 companions with Source Han presets and LXGW WenKai, plus **fixed Chinese weights** — implemented as synthesized `@font-face` remap families over named local cuts, so Chinese can hold a weight independent of the Latin around it while bold keeps its +200 step. Every face row ends in an "Other…" picker of the system's installed fonts (the same list as Settings → Appearance → Font, via Obsidian's own `get-fonts` module with `queryLocalFonts` and a typed-name fallback); the Chinese pickers filter that list through a 636-byte embedded blank-font glyph probe, so only fonts that can actually set Chinese appear. New test group `t10-typefaces` (the harness is now 10 groups). Requires theme [Tufte 1.17.0](https://github.com/PleiadesM/TufteObsidian/releases/tag/1.17.0) for the knobs to have effect; modules unchanged (backlinks 1.0.1, figures 1.7.3, inline 1.2.1, sidenotes 1.7.0).
-- **1.0.2** (2026-08-14) — tufte-figures 1.7.3: the default figure's margin caption becomes a float using the sidenotes' exact recipe, so captions and sidenotes stack in one `clear:right` queue — a sidenote near a figure can no longer overlap the caption — and both share the same left edge (the old grid column sat 2cqi further left). The caption still starts level with its image; Live Preview and panes under 760px keep image-above-caption. Pair with theme [Tufte 1.16.3](https://github.com/PleiadesM/TufteObsidian/releases/tag/1.16.3) for the print-side geometry. Other modules unchanged.
-- **1.0.1** (2026-08-11) — tufte-inline 1.2.1: the `&&…&&` / `^^…^^` / `@@…@@` shorthands survive nested markup (`[[links]]`, bold, italic) in Reading view, and the Live Preview lead-in indent rides a concealed-delimiter widget. Ships with theme Tufte 1.16.1.
-- **1.0.0** (2026-08-05) — first release: the four standalone Tufte plugins (backlinks 1.0.1, figures 1.7.2, inline 1.2.0, sidenotes 1.7.0) bundled as switchable modules with namespaced settings, a single settings tab, and one-time import of standalone settings and the quilt store.
+- **1.2.0** (2026-08-14)
+  - Now, the whole Suite speaks Chinese
+  - Unify the figure modal's tabs with the settings tab bar
+  - Pair with theme Tufte 1.18.0
+- **1.1.0** (2026-08-14)
+  - Add the Typefaces settings: Latin and Chinese faces and weights
+  - Add pickers for installed system fonts
+  - Requires theme Tufte 1.17.0
+- **1.0.2** (2026-08-14)
+  - Fix figure captions overlapping sidenotes
+  - Align the left edges of margin content
+- **1.0.1** (2026-08-11)
+  - Inline shorthands now survive nested markup
+- **1.0.0** (2026-08-05)
+  - First release: the four Tufte plugins bundled as switchable modules
